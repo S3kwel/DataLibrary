@@ -5,12 +5,14 @@ namespace DATA.Repository.Implementation
 {
     public abstract class BaseEntity
     {
-        public IPrimaryKey? PrimaryKey { get; set; }
+        public IPrimaryKey? PrimaryKey { get; set; } = null; 
 
         public BaseEntity()
         {
-            
+
         }
+
+       
 
         public DateTime PeriodStart { get; set; }
         public DateTime PeriodEnd { get; set; }
@@ -28,6 +30,6 @@ namespace DATA.Repository.Implementation
             }
         }
 
-       
+
     }
 }

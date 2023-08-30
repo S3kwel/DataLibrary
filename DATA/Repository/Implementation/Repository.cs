@@ -133,13 +133,24 @@ namespace DATA.Repository.Implementation
 
             //At this point, all filter conditions should be fulfilled.
             //Calling ToList here should be fine.  
-            var results = query.ToList();
+
             int totalCount = query.Count();
+
+
+
             int totalPages = (int)Math.Ceiling(totalCount / (double)filter.PageSize);
+
+            if (totalPages == 0)
+                filter.PageNumber = 1;  // or whatever default or fallback you prefer
             if (filter.PageNumber > totalPages)
-            {
                 filter.PageNumber = totalPages;
-            }
+            
+
+            var results = query.Skip((filter.PageNumber - 1) * filter.PageSize).Take(filter.PageSize).ToList();
+
+
+
+           
             var status = DetermineRequestStatus(results, filter);
 
             bool hasResults = results.Count > 0;
@@ -153,7 +164,7 @@ namespace DATA.Repository.Implementation
             //If there are no objects to return, return a null on results.  
             if (hasResults)
             {
-                return new Result<Filter<T>, T>(filter, status, null)
+                return new Result<Filter<T>, T>(filter, status, convertResults)
                 {
                     Pagination = new PaginationMetadata
                     {
@@ -165,7 +176,7 @@ namespace DATA.Repository.Implementation
             }
             else
             {
-                return new Result<Filter<T>, T>(filter, status, convertResults)
+                return new Result<Filter<T>, T>(filter, status, null)
                 {
                     Pagination = new PaginationMetadata
                     {
@@ -200,12 +211,20 @@ namespace DATA.Repository.Implementation
         }
         public Result<Filter<T>, T> HistoricActiveThrough(DateTime startDate, DateTime endDate, Filter<T>? filter)
         {
-            filter = PrepareFilter(HistoricFetchMode.AllTime, startDate, endDate, filter);
+            filter = PrepareFilter(HistoricFetchMode.ActiveThrough, startDate, endDate, filter);
             return Process(filter);
         }
 
 
+        public Result<Filter<T>, T> GetById(TKey primaryKey)
+        {
+            // You can adjust the predicate here based on TKey.
+            var entity = _dbContext.Set<T>().Find(primaryKey);
 
+            // Convert to Result object and return.
+            // This is a simplified example. Adjust as needed.
+            return new Result<Filter<T>, T>(new Filter<T>(), RequestStatus.SUCCEEDED, new List<SingleResult<Filter<T>, T>> { new SingleResult<Filter<T>, T>(entity) });
+        }
         public Result<Filter<T>, T> GetByKey(IPrimaryKey key)
         {
             var values = key.GetKeyValues();

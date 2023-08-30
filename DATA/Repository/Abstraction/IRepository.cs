@@ -16,5 +16,6 @@ namespace DATA.Repository.Abstraction
         Result<Filter<T>, T> HistoricActiveWithin(DateTime validFrom, DateTime validTo, Filter<T>? filter = null);
         Result<Filter<T>, T> HistoricAllTime(Filter<T>? filter = null);
         Result<Filter<T>, T> HistoricAtExactTime(DateTime exactTime, Filter<T>? filter);
+        Result<Filter<T>, T> GetById(TKey primaryKey);
     }
 }
