@@ -4,24 +4,23 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DATA.Repository.Abstraction.ConcurrencyHandling
 {
-    public interface IUnitOfWork : IDisposable
+    public interface IUnitOfWork<TContext> : IDisposable where TContext : DbContext
     {
-        IRepository<T, TKey> Repository<T, TKey>() where T : BaseEntity;
+        IRepository<T, TKey> Repository<T, TKey>() where T : BaseEntity<TKey>;
         void Save();
     }
 
-    public class UnitOfWork : IUnitOfWork
+    public class UnitOfWork<TContext> : IUnitOfWork<TContext> where TContext : DbContext
     {
-        private readonly DbContext _context;
+        private readonly TContext _context;
         private Dictionary<String, object>? _repositories;
 
-        public UnitOfWork(DbContext context)
+        public UnitOfWork(TContext context)
         {
             _context = context;
         }
 
-       
-        public IRepository<T, TKey> Repository<T, TKey>() where T : BaseEntity
+        public IRepository<T, TKey> Repository<T, TKey>() where T : BaseEntity<TKey>
         {
             if (_repositories == null)
             {
@@ -34,7 +33,7 @@ namespace DATA.Repository.Abstraction.ConcurrencyHandling
             {
                 var repositoryType = typeof(Repository<,>);
                 var repositoryInstance = Activator.CreateInstance(repositoryType.MakeGenericType(typeof(T), typeof(TKey)), _context);
-                if(repositoryInstance != null)
+                if (repositoryInstance != null)
                     _repositories[type] = repositoryInstance;
             }
             return (IRepository<T, TKey>)_repositories[type];
@@ -51,6 +50,9 @@ namespace DATA.Repository.Abstraction.ConcurrencyHandling
             GC.SuppressFinalize(this);
         }
     }
+
+
+
 
 
 }

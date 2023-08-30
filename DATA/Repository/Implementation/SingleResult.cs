@@ -3,18 +3,18 @@ using DATA.Repository.Implementation.Pagination;
 
 namespace DATA.Repository.Abstraction
 {
-    public record SingleResult<TFilter, T>(T? Value) : ISingleResult<TFilter, T>
-    where TFilter : Filter<T>
-    where T : BaseEntity
+    public record SingleResult<TFilter, T, TKey>(T? Value) : ISingleResult<TFilter, T, TKey>
+    where TFilter : Filter<T, TKey>
+    where T : BaseEntity<TKey>
     { 
         public T? Value { get; private set; } = Value;
-        private Filter<T> _filter { get; } = new Filter<T>();
+        private Filter<T, TKey> _filter { get; } = new Filter<T, TKey>();
 
         public RequestStatus Status { get; private set; } = RequestStatus.NEW;
         public bool Succeeded { get; private set; } = false;
         public bool IsHistoric { get; private set; } = false;
 
-        public SingleResult(T? value, Filter<T> filter, RequestStatus status) : this(value)
+        public SingleResult(T? value, Filter<T, TKey> filter, RequestStatus status) : this(value)
         {
             Succeeded = (status == RequestStatus.SUCCEEDED || status == RequestStatus.SUCCEEDED_WITH_ERRORS);
             Status = status;
@@ -22,32 +22,32 @@ namespace DATA.Repository.Abstraction
             IsHistoric = filter.FetchMode != HistoricFetchMode.Invalid;
         }
 
-        public SingleResult<TFilter, T> Success(T? value, Filter<T> filter)
+        public SingleResult<TFilter, T, TKey> Success(T? value, Filter<T, TKey> filter)
         {
-            return new SingleResult<TFilter, T>(value, filter, RequestStatus.SUCCEEDED);
+            return new SingleResult<TFilter, T, TKey>(value, filter, RequestStatus.SUCCEEDED);
         }
 
-        public SingleResult<TFilter, T> PartialSucces(T? value, Filter<T> filter)
+        public SingleResult<TFilter, T, TKey> PartialSucces(T? value, Filter<T, TKey> filter)
         {
-            return new SingleResult<TFilter, T>(value, filter, RequestStatus.SUCCEEDED_WITH_ERRORS);
+            return new SingleResult<TFilter, T, TKey>(value, filter, RequestStatus.SUCCEEDED_WITH_ERRORS);
         }
 
-        public SingleResult<TFilter, T> Failure(T? value, Filter<T> filter)
+        public SingleResult<TFilter, T, TKey> Failure(T? value, Filter<T, TKey> filter)
         {
-            return new SingleResult<TFilter, T>(value, filter, RequestStatus.FAILED);
+            return new SingleResult<TFilter, T, TKey>(value, filter, RequestStatus.FAILED);
         }
 
     }
 
-    public class Result<TFilter, T>
-        where TFilter : Filter<T>
-        where T : BaseEntity
+    public class Result<TFilter, T, TKey>
+        where TFilter : Filter<T,TKey>
+        where T : BaseEntity<TKey>
     {
         public PaginationMetadata? Pagination { get; set; }
 
 
-        private readonly Filter<T> _filter;
-        public List<SingleResult<TFilter, T>>? Values { get; set; }
+        private readonly Filter<T, TKey> _filter;
+        public List<SingleResult<TFilter, T, TKey>>? Values { get; set; }
         public RequestStatus Status { get; private set; } = RequestStatus.NEW;
         public bool Succeeded
         {
@@ -83,7 +83,7 @@ namespace DATA.Repository.Abstraction
                 return false;
             }
         }
-        public Result(TFilter filter, RequestStatus status, List<SingleResult<TFilter, T>>? results)
+        public Result(TFilter filter, RequestStatus status, List<SingleResult<TFilter, T, TKey>>? results)
         {
 
 
@@ -91,7 +91,7 @@ namespace DATA.Repository.Abstraction
             _filter = filter; 
             Status = status;
         }
-        public Result<TFilter, T> AddValue(SingleResult<TFilter, T> result)
+        public Result<TFilter, T, TKey> AddValue(SingleResult<TFilter, T, TKey> result)
         {
 
 

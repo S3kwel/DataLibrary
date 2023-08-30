@@ -9,37 +9,42 @@ using System.Linq.Expressions;
 
 namespace DATA.Repository.Implementation
 {
-    public class Repository<T, TKey> : IRepository<T, TKey> where T : BaseEntity
+    public class Repository<T, TKey> : IRepository<T, TKey> where T : BaseEntity<TKey>
     {
         private readonly DbContext _dbContext;
-        private readonly IEnumerable<IQueryStrategy<T>> _queryStrategies;
-        private readonly IDebugStrategy<T> _debugStrategy;
+        private readonly IEnumerable<IQueryStrategy<T, TKey>> _queryStrategies;
+        private readonly IDebugStrategy<T, TKey> _debugStrategy;
         private readonly IPrimaryKey _primaryKey;
         public bool UseDefaultDebugging { get; set; } = true;
-        public Action<IQueryable<T?>, Filter<T>, DebugContext>? BeforeProcessing { get; set; }
-        public Action<IQueryable<T?>, Filter<T>, DebugContext>? AfterProcessing { get; set; }
+        public Action<IQueryable<T?>, Filter<T, TKey>, DebugContext>? BeforeProcessing { get; set; }
+        public Action<IQueryable<T?>, Filter<T, TKey>, DebugContext>? AfterProcessing { get; set; }
+
+        public int Count { get; set; } = -1;
 
         public Repository(DbContext context,
-                          IEnumerable<IQueryStrategy<T>> strategies,
-                          IDebugStrategy<T> debugStrategy,
+                          IEnumerable<IQueryStrategy<T, TKey>> strategies,
+                          IDebugStrategy<T, TKey> debugStrategy,
                           IPrimaryKey primaryKey)
         {
             _dbContext = context;
             _queryStrategies = strategies;
-            _debugStrategy = debugStrategy ?? new DefaultDebugStrategy<T>();
+            _debugStrategy = debugStrategy ?? new DefaultDebugStrategy<T, TKey>();
             _primaryKey = primaryKey;
+
+            //TODO:  Optimize this
+            Count = context.Set<T>().Count();
         }
 
-        private IQueryStrategy<T>? GetStrategyForFetchMode(HistoricFetchMode mode)
+        private IQueryStrategy<T, TKey>? GetStrategyForFetchMode(HistoricFetchMode mode)
         {
 
             return _queryStrategies.FirstOrDefault(s => s.FetchMode == mode);
         }
 
 
-        private Filter<T> PrepareFilter(HistoricFetchMode fetchMode, DateTime? validFrom = null, DateTime? validTo = null, Filter<T>? filter = null)
+        private Filter<T, TKey> PrepareFilter(HistoricFetchMode fetchMode, DateTime? validFrom = null, DateTime? validTo = null, Filter<T, TKey>? filter = null)
         {
-            filter ??= new Filter<T>().WithFetchMode(fetchMode);
+            filter ??= new Filter<T, TKey>().WithFetchMode(fetchMode);
 
             if (validFrom.HasValue)
                 filter.WithValidFrom(validFrom.Value);
@@ -50,7 +55,7 @@ namespace DATA.Repository.Implementation
             return filter;
         }
 
-        internal RequestStatus DetermineRequestStatus(IList<T> results, Filter<T> filter)
+        internal RequestStatus DetermineRequestStatus(IList<T> results, Filter<T, TKey> filter)
         {
             bool hasResults = results.Count > 0;
             bool isFilterValid = filter.IsValid();
@@ -74,7 +79,7 @@ namespace DATA.Repository.Implementation
         }
 
 
-        private Result<Filter<T>, T> Process(Filter<T> filter)
+        private Result<Filter<T, TKey>, T, TKey> Process(Filter<T, TKey> filter)
         {
 
             if (filter.PageNumber < 1)
@@ -102,7 +107,7 @@ namespace DATA.Repository.Implementation
             //Return failure with no results if we're using a fetch mode we don't have a strategy for.  
             if (GetStrategyForFetchMode(filter.FetchMode) == null)
             {
-                return new Result<Filter<T>, T>(filter, RequestStatus.FAILED, null);
+                return new Result<Filter<T, TKey>, T, TKey>(filter, RequestStatus.FAILED, null);
             }
 
             //Pre-processing
@@ -111,8 +116,8 @@ namespace DATA.Repository.Implementation
 
 
             _debugStrategy.BeforeHook(query, filter, debugContext, "PreProcessing");
-            query = QueryableExtensions<T>.DisableQueryFilters(query, filter);
-            query = QueryableExtensions<T>.ApplyEagerLoading(query, filter);
+            query = QueryableExtensions<T, TKey>.DisableQueryFilters(query, filter);
+            query = QueryableExtensions<T, TKey>.ApplyEagerLoading(query, filter);
             _debugStrategy.AfterHook(query, filter, debugContext, "PreProcessing");
 
 
@@ -125,8 +130,8 @@ namespace DATA.Repository.Implementation
 
             //Post-Processing
             _debugStrategy.BeforeHook(query, filter, debugContext, "PostProcessing");
-            query = QueryableExtensions<T>.ApplyFilteringLogic(query, filter);
-            query = QueryableExtensions<T>.ApplyOrderingLogic(query, filter);
+            query = QueryableExtensions<T, TKey>.ApplyFilteringLogic(query, filter);
+            query = QueryableExtensions<T, TKey>.ApplyOrderingLogic(query, filter);
             _debugStrategy.AfterHook(query, filter, debugContext, "PostProcessing");
             query = query.Skip((filter.PageNumber - 1) * filter.PageSize).Take(filter.PageSize);
 
@@ -144,19 +149,19 @@ namespace DATA.Repository.Implementation
                 filter.PageNumber = 1;  // or whatever default or fallback you prefer
             if (filter.PageNumber > totalPages)
                 filter.PageNumber = totalPages;
-            
+
 
             var results = query.Skip((filter.PageNumber - 1) * filter.PageSize).Take(filter.PageSize).ToList();
 
 
 
-           
+
             var status = DetermineRequestStatus(results, filter);
 
             bool hasResults = results.Count > 0;
             //Results with an invalid filter leads to succeded with errors.  
 
-            var convertResults = query.Select(r => new SingleResult<Filter<T>, T>(r, filter, status)).ToList();
+            var convertResults = query.Select(r => new SingleResult<Filter<T, TKey>, T, TKey>(r, filter, status)).ToList();
 
 
 
@@ -164,7 +169,7 @@ namespace DATA.Repository.Implementation
             //If there are no objects to return, return a null on results.  
             if (hasResults)
             {
-                return new Result<Filter<T>, T>(filter, status, convertResults)
+                return new Result<Filter<T, TKey>, T, TKey>(filter, status, convertResults)
                 {
                     Pagination = new PaginationMetadata
                     {
@@ -176,7 +181,7 @@ namespace DATA.Repository.Implementation
             }
             else
             {
-                return new Result<Filter<T>, T>(filter, status, null)
+                return new Result<Filter<T, TKey>, T, TKey>(filter, status, null)
                 {
                     Pagination = new PaginationMetadata
                     {
@@ -188,48 +193,48 @@ namespace DATA.Repository.Implementation
             }
 
         }
-        public Result<Filter<T>, T> HistoricAllTime(Filter<T>? filter = null)
+        public Result<Filter<T, TKey>, T, TKey> HistoricAllTime(Filter<T, TKey>? filter = null)
         {
             filter = PrepareFilter(HistoricFetchMode.AllTime, null, null, filter);
             return Process(filter);
         }
 
-        public Result<Filter<T>, T> HistoricActiveWithin(DateTime validFrom, DateTime validTo, Filter<T>? filter = null)
+        public Result<Filter<T, TKey>, T, TKey> HistoricActiveWithin(DateTime validFrom, DateTime validTo, Filter<T, TKey>? filter = null)
         {
             filter = PrepareFilter(HistoricFetchMode.ActiveWithin, validFrom, validTo, filter);
             return Process(filter);
         }
-        public Result<Filter<T>, T> HistoricAtExactTime(DateTime exactTime, Filter<T>? filter)
+        public Result<Filter<T, TKey>, T, TKey> HistoricAtExactTime(DateTime exactTime, Filter<T, TKey>? filter)
         {
             filter = PrepareFilter(HistoricFetchMode.AtExactTime, exactTime, null, filter);
             return Process(filter);
         }
-        public Result<Filter<T>, T> HistoricActiveBetween(DateTime startDate, DateTime endDate, Filter<T>? filter)
+        public Result<Filter<T, TKey>, T, TKey> HistoricActiveBetween(DateTime startDate, DateTime endDate, Filter<T, TKey>? filter)
         {
             filter = PrepareFilter(HistoricFetchMode.ActiveBetween, startDate, endDate, filter);
             return Process(filter);
         }
-        public Result<Filter<T>, T> HistoricActiveThrough(DateTime startDate, DateTime endDate, Filter<T>? filter)
+        public Result<Filter<T, TKey>, T, TKey> HistoricActiveThrough(DateTime startDate, DateTime endDate, Filter<T, TKey>? filter)
         {
             filter = PrepareFilter(HistoricFetchMode.ActiveThrough, startDate, endDate, filter);
             return Process(filter);
         }
 
 
-        public Result<Filter<T>, T> GetById(TKey primaryKey)
+        public Result<Filter<T, TKey>, T, TKey> GetById(TKey primaryKey)
         {
             // You can adjust the predicate here based on TKey.
             var entity = _dbContext.Set<T>().Find(primaryKey);
 
             // Convert to Result object and return.
             // This is a simplified example. Adjust as needed.
-            return new Result<Filter<T>, T>(new Filter<T>(), RequestStatus.SUCCEEDED, new List<SingleResult<Filter<T>, T>> { new SingleResult<Filter<T>, T>(entity) });
+            return new Result<Filter<T, TKey>, T, TKey>(new Filter<T, TKey>(), RequestStatus.SUCCEEDED, new List<SingleResult<Filter<T, TKey>, T, TKey>> { new SingleResult<Filter<T, TKey>, T, TKey>(entity) });
         }
-        public Result<Filter<T>, T> GetByKey(IPrimaryKey key)
+        public Result<Filter<T, TKey>, T, TKey> GetByKey(IPrimaryKey key)
         {
             var values = key.GetKeyValues();
             var keyProperties = key.GetKeyProperties();
-            var filterGroup = new List<FilterGroup<T>>();
+            var filterGroup = new List<FilterGroup<T, TKey>>();
 
             if (keyProperties.Length != values.Length)
                 throw new ArgumentException("Number of key properties doesn't match the number of values.");
@@ -244,11 +249,11 @@ namespace DATA.Repository.Implementation
                 var equalsExp = Expression.Equal(propertyExp, valueExp);
                 var lambda = Expression.Lambda<Func<T, bool>>(equalsExp, parameter);
 
-                filterGroup.Add(new FilterGroup<T>
+                filterGroup.Add(new FilterGroup<T, TKey>
                 {
-                    Conditions = new List<FilterCondition<T>>
+                    Conditions = new List<FilterCondition<T, TKey>>
             {
-                new FilterCondition<T>
+                new FilterCondition< T, TKey >
                 {
                     Condition = lambda
                 }
@@ -256,7 +261,7 @@ namespace DATA.Repository.Implementation
                 });
             }
 
-            var filter = new Filter<T>
+            var filter = new Filter<T, TKey>
             {
                 LogicGroups = filterGroup
             };
@@ -264,6 +269,9 @@ namespace DATA.Repository.Implementation
             return Process(filter);
         }
 
-
+        public void Insert(T entity)
+        {
+            _dbContext.Set<T>().Add(entity);   
+        }
     }
 }

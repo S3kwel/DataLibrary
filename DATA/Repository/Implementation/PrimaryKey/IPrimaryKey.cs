@@ -7,10 +7,11 @@
         string[] GetKeyProperties();
     }
 
-    public interface IPrimaryKey<T> : IPrimaryKey where T : BaseEntity
+    public interface IPrimaryKey<TKey>
     {
-        T? Key { get; set; }
+        TKey? PrimaryKey { get; set; }
     }
+
 
 
 

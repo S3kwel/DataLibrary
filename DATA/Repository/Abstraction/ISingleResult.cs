@@ -2,9 +2,9 @@
 
 namespace DATA.Repository.Abstraction
 {
-    public interface ISingleResult<TFilter, T>
-        where TFilter : Filter<T>
-        where T : BaseEntity
+    public interface ISingleResult<TFilter, T, TKey>
+        where TFilter : Filter<T, TKey>
+        where T : BaseEntity<TKey>
     {
         bool IsHistoric { get; }
         RequestStatus Status { get; }
@@ -13,11 +13,11 @@ namespace DATA.Repository.Abstraction
 
         void Deconstruct(out T? Value);
         bool Equals(object? obj);
-        bool Equals(SingleResult<TFilter, T>? other);
-        SingleResult<TFilter, T> Failure(T? value, Filter<T> filter);
+        bool Equals(SingleResult<TFilter, T, TKey>? other);
+        SingleResult<TFilter, T, TKey> Failure(T? value, Filter<T, TKey> filter);
         int GetHashCode();
-        SingleResult<TFilter, T> PartialSucces(T? value, Filter<T> filter);
-        SingleResult<TFilter, T> Success(T? value, Filter<T> filter);
+        SingleResult<TFilter, T, TKey> PartialSucces(T? value, Filter<T, TKey> filter);
+        SingleResult<TFilter, T, TKey> Success(T? value, Filter<T, TKey> filter);
         string ToString();
     }
 }

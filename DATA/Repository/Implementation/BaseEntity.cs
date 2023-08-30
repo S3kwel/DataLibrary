@@ -3,16 +3,15 @@ using DATA.Repository.Implementation.PrimaryKey;
 
 namespace DATA.Repository.Implementation
 {
-    public abstract class BaseEntity
+    public  class BaseEntity<TKey> : IBaseEntity<TKey>, IPrimaryKey<TKey>
     {
-        public IPrimaryKey? PrimaryKey { get; set; } = null; 
-
+        public TKey? PrimaryKey { get; set; }
         public BaseEntity()
         {
 
         }
 
-       
+
 
         public DateTime PeriodStart { get; set; }
         public DateTime PeriodEnd { get; set; }
@@ -25,11 +24,11 @@ namespace DATA.Repository.Implementation
                 if (PrimaryKey == null)
                     return string.Empty;
 
-                var keyValues = PrimaryKey.GetKeyValues();
-                return string.Join("-", keyValues.Select(v => v?.ToString() ?? "null"));
+                var keyValues = PrimaryKey;
+                return PrimaryKey.ToString() ?? "null";
             }
         }
 
-
+       
     }
 }

@@ -5,9 +5,9 @@ using System.Linq.Expressions;
 
 namespace DATA.Repository.Implementation
 {
-    public static class QueryableExtensions<T> where T : BaseEntity
+    public static class QueryableExtensions<T, TKey> where T : BaseEntity<TKey>
     {
-        internal static IQueryable<T> ApplyEagerLoading(IQueryable<T> query, Filter<T> filter)
+        internal static IQueryable<T> ApplyEagerLoading(IQueryable<T> query, Filter<T, TKey> filter)
         {
             if (filter.Includes.Count == 0 || filter == null) return query;
 
@@ -17,7 +17,7 @@ namespace DATA.Repository.Implementation
             }
             return query;
         }
-        internal static IQueryable<T> DisableQueryFilters(IQueryable<T> query, Filter<T> filter)
+        internal static IQueryable<T> DisableQueryFilters(IQueryable<T> query, Filter<T, TKey> filter)
         {
             if (filter.IncludeDeletedRecords)
                 return query.IgnoreQueryFilters();
@@ -47,7 +47,7 @@ namespace DATA.Repository.Implementation
             }
             return query;
         }
-        internal static IQueryable<T> ApplyFilteringLogic(IQueryable<T> query, Filter<T> filter)
+        internal static IQueryable<T> ApplyFilteringLogic(IQueryable<T> query, Filter<T, TKey> filter)
         {
             if (filter.LogicGroups.Count == 0 || filter.LogicGroups == null) return query;
             foreach (var group in filter.LogicGroups)
@@ -81,7 +81,7 @@ namespace DATA.Repository.Implementation
 
             return Expression.Lambda<Func<T, object>>(conversion, parameter);
         }
-        internal static IQueryable<T> ApplyOrderingLogic(IQueryable<T> query, Filter<T> filter)
+        internal static IQueryable<T> ApplyOrderingLogic(IQueryable<T> query, Filter<T, TKey> filter)
         {
             if (filter.OrderingCriteria != null)
             {

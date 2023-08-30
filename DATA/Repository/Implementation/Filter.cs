@@ -3,8 +3,8 @@ using System.Linq.Expressions;
 
 namespace DATA.Repository.Implementation
 {
-    public class Filter<T>
-        where T :BaseEntity
+    public class Filter<T, TKey>
+        where T :BaseEntity<TKey>   
     {
         #region Class Properties
 
@@ -12,7 +12,7 @@ namespace DATA.Repository.Implementation
         internal DateTime? ValidTo { get; private set; }
         internal Guid? VersionTag { get; private set; }
         internal HistoricFetchMode FetchMode { get; set; }
-        public List<FilterGroup<T>> LogicGroups { get; set; } = new();
+        public List<FilterGroup<T, TKey>> LogicGroups { get; set; } = new();
         public bool IncludeDeletedRecords { get; private set; } = false;
         public int PageNumber { get;  set; } = 1;
         public int PageSize { get;  set; } = 10;
@@ -21,52 +21,52 @@ namespace DATA.Repository.Implementation
         #endregion
 
         #region Fluent Setters 
-        internal Filter<T> WithValidFrom(DateTime date)
+        internal Filter<T, TKey> WithValidFrom(DateTime date)
         {
             ValidFrom = date;
             return this;
         }
-        internal Filter<T> WithValidTo(DateTime date)
+        internal Filter<T, TKey> WithValidTo(DateTime date)
         {
             ValidTo = date;
             return this;
         }
-        internal Filter<T> WithVersionTag(Guid tag)
+        internal Filter<T, TKey> WithVersionTag(Guid tag)
         {
             VersionTag = tag;
             return this;
         }
-        internal Filter<T> WithFetchMode(HistoricFetchMode mode)
+        internal Filter<T, TKey> WithFetchMode(HistoricFetchMode mode)
         {
             FetchMode = mode;
             return this;
         }
-        public Filter<T> AddLogicGroup(FilterGroup<T> group)
+        public Filter<T, TKey> AddLogicGroup(FilterGroup<T, TKey> group)
         {
             LogicGroups.Add(group);
             return this;
         }
-        public Filter<T> IncludeDeleted()
+        public Filter<T, TKey> IncludeDeleted()
         {
             IncludeDeletedRecords = true;
             return this;
         }
-        public Filter<T> WithPageNumber(int pageNumber)
+        public Filter<T, TKey> WithPageNumber(int pageNumber)
         {
             PageNumber = pageNumber;
             return this;
         }
-        public Filter<T> WithPageSize(int pageSize)
+        public Filter<T, TKey> WithPageSize(int pageSize)
         {
             PageSize = pageSize;
             return this;
         }
-        public Filter<T> AddInclude(Expression<Func<T, bool>> include)
+        public Filter<T, TKey> AddInclude(Expression<Func<T, bool>> include)
         {
             Includes.Add(include);
             return this;
         }
-        public Filter<T> AddOrderingCriteria(OrderingCriteria criteria)
+        public Filter<T, TKey> AddOrderingCriteria(OrderingCriteria criteria)
         {
             OrderingCriteria.Add(criteria);
             return this;

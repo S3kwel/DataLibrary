@@ -3,9 +3,9 @@ using System.Diagnostics;
 
 namespace DATA.Repository.Implementation.Debugging.Implementations
 {
-    public class DefaultDebugStrategy<T> : IDebugStrategy<T> where T : BaseEntity
+    public class DefaultDebugStrategy<T, TKey> : IDebugStrategy<T, TKey> where T : BaseEntity<TKey>
         {
-            public void BeforeHook(IQueryable<T> query, Filter<T> filter, DebugContext context, string sectionName)
+            public void BeforeHook(IQueryable<T> query, Filter<T, TKey> filter, DebugContext context, string sectionName)
             {
                 Debug.WriteLine($"Before {sectionName}:");
                 context.Stopwatch.Start();
@@ -16,7 +16,7 @@ namespace DATA.Repository.Implementation.Debugging.Implementations
                 Debug.WriteLine($"Data Count: {dataSnapshot.Count}");
              }
 
-            public void AfterHook(IQueryable<T> query, Filter<T> filter, DebugContext context, string sectionName)
+            public void AfterHook(IQueryable<T> query, Filter<T, TKey> filter, DebugContext context, string sectionName)
             {
                 Debug.WriteLine($"After {sectionName}:");
                 Debug.WriteLine($"Query: {query}");
