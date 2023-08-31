@@ -3,6 +3,7 @@
     public interface IHistoricEntity
     {
 
+
     }
 
 }

@@ -8,7 +8,7 @@ using DATA.Repository.Abstraction.ConcurrencyHandling;
 
 namespace DATA.Tests.Integration
 {
-    public class TestUnitOfWork : UnitOfWork<TestContext>
+    public class TestUnitOfWork<TKey> : UnitOfWork<TestContext>
     {
         public TestUnitOfWork(TestContext context) : base(context)
         {

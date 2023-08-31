@@ -1,21 +1,44 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿using DATA.Repository.Abstraction;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
-using DATA.Repository.Abstraction;
-using DATA.Repository.Implementation;
 
 namespace DATA.Repository.Configuration
 {
-    public class Config {
+    public class Config
+    {
+        public interface IPeriodEntity
+        {
+            DateTime PeriodStart { get; set; }
+            DateTime PeriodEnd { get; set; }
+        }
+
+
 
         public class HistoricEntityConfiguration<T> : IEntityTypeConfiguration<T>
-          where T : class, IBaseEntity<Guid>
+            where T : class, IBaseEntity<Guid>
         {
             public void Configure(EntityTypeBuilder<T> builder)
             {
-                builder.ToView(nameof(T) + "History");
-                builder.Property(e=> e.PeriodStart).IsRequired();
-                builder.Property(e=> e.PeriodEnd).IsRequired();
-                builder.Property(e=> e.VersionTag).IsRequired().HasDefaultValueSql("NEWID()");
+                if (GlobalEFConfiguration.IsMigration)
+                {
+                    builder.ToTable(typeof(T).Name + "History", c =>
+                    {
+                        c.IsTemporal(e =>
+                        {
+                            e.HasPeriodEnd("ShadowPeriodEnd");
+                            e.HasPeriodStart("ShadowPeriodStart");
+                        });
+                    });
+
+
+                }
+                else
+                {
+                    builder.ToView(typeof(T).Name + "History");
+  
+                    builder.Property(e => e.VersionTag).IsRequired().HasDefaultValueSql("NEWID()");
+                }
+
             }
         }
 
@@ -24,17 +47,11 @@ namespace DATA.Repository.Configuration
         {
             public void Configure(EntityTypeBuilder<T> builder)
             {
-                // Set properties as required
                 builder.Property(e => e.IsDeleted).IsRequired();
-                builder.Property(e => e.PeriodStart).IsRequired();
-                builder.Property(e => e.PeriodEnd).IsRequired();
+              
                 builder.Property(e => e.VersionTag).IsRequired();
-
                 builder.HasKey(e => e.PrimaryKey);
             }
         }
-
     }
-
-
 }

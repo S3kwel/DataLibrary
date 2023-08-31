@@ -4,7 +4,7 @@ using DATA.Repository.Implementation.PrimaryKey;
 
 namespace DATA.Repository.Implementation
 {
-    public interface IRepository<T, TKey> where T : BaseEntity<TKey>
+    public interface IHistoricRepository<T, TKey> where T : BaseEntity<TKey>
     {
         Action<IQueryable<T?>, Filter<T, TKey>, DebugContext>? AfterProcessing { get; set; }
         Action<IQueryable<T?>, Filter<T, TKey>, DebugContext>? BeforeProcessing { get; set; }

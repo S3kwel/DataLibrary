@@ -22,7 +22,7 @@ namespace DATA.Repository.Configuration
     }
 
     public static class StrategyRegistrationFactory<T,TKey>
-        where T : BaseEntity<TKey>
+        where T : HistoricBaseEntity<TKey>
     {
         public static void RegisterStrategiesForAllEntities(IServiceCollection services, Assembly targetAssembly)
         {

@@ -3,7 +3,7 @@ using DATA.Repository.Abstraction.Strategies;
 
 namespace DATA.Repository.Implementation.Strategies
 {
-    public class ActiveThroughStrategy<T, TKey> : IQueryStrategy<T,TKey> where T : BaseEntity<TKey>
+    public class ActiveThroughStrategy<T, TKey> : IQueryStrategy<T,TKey> where T : HistoricBaseEntity<TKey>
     {
         public HistoricFetchMode FetchMode => HistoricFetchMode.ActiveThrough;
 

@@ -1,7 +1,9 @@
 ﻿using DATA.Repository.Abstraction;
+using DATA.Repository.Configuration;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity.ModelConfiguration;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -73,36 +75,29 @@ namespace DATA.Repository.Implementation
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // Get all entity types that are subclasses of BaseEntity<TKey>
+            var entityTypes = modelBuilder.Model.GetEntityTypes()
+                .Where(e => typeof(IBaseEntity<TKey>).IsAssignableFrom(e.ClrType) && !e.ClrType.IsAbstract);
+
+            foreach (var entityType in entityTypes)
+            {
+                var clrType = entityType.ClrType;
+
+                if (clrType.Name.Contains("Historic")) // Apply historic entity configuration
+                {
+                    var configurationType = typeof(Config.HistoricEntityConfiguration<>).MakeGenericType(clrType);
+                    dynamic configurationInstance = Activator.CreateInstance(configurationType);
+                    modelBuilder.ApplyConfiguration(configurationInstance);
+                }
+                else // Apply base entity configuration
+                {
+                    var configurationType = typeof(Config.BaseEntityConfiguration<>).MakeGenericType(clrType);
+                    dynamic configurationInstance = Activator.CreateInstance(configurationType);
+                    modelBuilder.ApplyConfiguration(configurationInstance);
+                }
+            }
+
             base.OnModelCreating(modelBuilder);
-            var historicEntities = GetHistoricEntityTypes();
-            var baseEntities = GetBaseEntityTypes();
-
-
-            foreach (var type in baseEntities)
-            {
-                var configurationInstance = Activator.CreateInstance(typeof(BaseEntityConfiguration<>).MakeGenericType(type));
-
-                if (configurationInstance == null)
-                {
-                    throw new InvalidOperationException($"Failed to create a configuration instance for entity type: {type.FullName}");
-                }
-
-                modelBuilder.ApplyConfiguration((dynamic)configurationInstance!);
-            }
-
-            foreach (var type in historicEntities)
-            {
-                var configurationInstance = Activator.CreateInstance(typeof(HistoricEntityConfiguration<>).MakeGenericType(type));
-
-                if (configurationInstance == null)
-                {
-                    throw new InvalidOperationException($"Failed to create a configuration instance for entity type: {type.FullName}");
-                }
-
-                modelBuilder.ApplyConfiguration((dynamic)configurationInstance!);
-            }
-
-
         }
 
         public override int SaveChanges()

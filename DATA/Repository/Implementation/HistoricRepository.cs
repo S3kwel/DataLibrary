@@ -9,9 +9,10 @@ using System.Linq.Expressions;
 
 namespace DATA.Repository.Implementation
 {
-    public class Repository<T, TKey> : IRepository<T, TKey> where T : BaseEntity<TKey>
+    public class HistoricRepository<T, TKey> : IRepository<T, TKey> where T : BaseEntity<TKey>
     {
         private readonly DbContext _dbContext;
+        private readonly IEnumerable<IQueryStrategy<T, TKey>> _queryStrategies;
         private readonly IDebugStrategy<T, TKey> _debugStrategy;
         public bool UseDefaultDebugging { get; set; } = true;
         public int Count { get; set; } = -1;
@@ -19,12 +20,39 @@ namespace DATA.Repository.Implementation
         public Action<IQueryable<T?>, Filter<T, TKey>, DebugContext>? AfterProcessing { get; set; }
 
 
-        public Repository(DbContext context, IDebugStrategy<T, TKey> debugStrategy)
+        public HistoricRepository(DbContext context,
+                          IEnumerable<IQueryStrategy<T, TKey>> strategies,
+                          IDebugStrategy<T, TKey> debugStrategy,
+                          IPrimaryKey primaryKey)
         {
             _dbContext = context;
+            _queryStrategies = strategies;
             _debugStrategy = debugStrategy ?? new DefaultDebugStrategy<T, TKey>();
+
+            //TODO:  Optimize this
             Count = context.Set<T>().Count();
         }
+
+        //TO HISTORIC
+        private IQueryStrategy<T, TKey>? GetStrategyForFetchMode(HistoricFetchMode mode)
+        {
+            return _queryStrategies.FirstOrDefault(s => s.FetchMode == mode);
+        }
+
+        //TO HISTORIC
+        private Filter<T, TKey> PrepareFilter(HistoricFetchMode fetchMode, DateTime? validFrom = null, DateTime? validTo = null, Filter<T, TKey>? filter = null)
+        {
+            filter ??= new Filter<T, TKey>().WithFetchMode(fetchMode);
+
+            if (validFrom.HasValue)
+                filter.WithValidFrom(validFrom.Value);
+
+            if (validTo.HasValue)
+                filter.WithValidTo(validTo.Value);
+
+            return filter;
+        }
+
         internal RequestStatus DetermineRequestStatus(IList<T> results, Filter<T, TKey> filter)
         {
             bool hasResults = results.Count > 0;
@@ -74,12 +102,30 @@ namespace DATA.Repository.Implementation
             // status = RequestStatus.NEW;
             var debugContext = new DebugContext();
 
-            
+            //Return failure with no results if we're using a fetch mode we don't have a strategy for.  
+            if (GetStrategyForFetchMode(filter.FetchMode) == null)
+            {
+                return new Result<Filter<T, TKey>, T, TKey>(filter, RequestStatus.FAILED, null);
+            }
+
             //Pre-processing
+            //TODO?  Make these return results too.  Would allow for more detailed status reporting.  
+
+
+
             _debugStrategy.BeforeHook(query, filter, debugContext, "PreProcessing");
             query = QueryableExtensions<T, TKey>.DisableQueryFilters(query, filter);
             query = QueryableExtensions<T, TKey>.ApplyEagerLoading(query, filter);
             _debugStrategy.AfterHook(query, filter, debugContext, "PreProcessing");
+
+
+            //Apply historic fetch mode strategy.  
+            //Null-forgiving because we've made this check already.
+
+            //TO HISTORIC
+            _debugStrategy.BeforeHook(query, filter, debugContext, "HistoricFetching");
+            query = GetStrategyForFetchMode(filter.FetchMode)!.Apply(query, filter);
+            _debugStrategy.AfterHook(query, filter, debugContext, "HistoricFetching");
 
             //Post-Processing
             _debugStrategy.BeforeHook(query, filter, debugContext, "PostProcessing");
@@ -145,6 +191,34 @@ namespace DATA.Repository.Implementation
                 };
             }
 
+        }
+
+        //Historic, Duh
+        public Result<Filter<T, TKey>, T, TKey> HistoricAllTime(Filter<T, TKey>? filter = null)
+        {
+            filter = PrepareFilter(HistoricFetchMode.AllTime, null, null, filter);
+            return Process(filter);
+        }
+
+        public Result<Filter<T, TKey>, T, TKey> HistoricActiveWithin(DateTime validFrom, DateTime validTo, Filter<T, TKey>? filter = null)
+        {
+            filter = PrepareFilter(HistoricFetchMode.ActiveWithin, validFrom, validTo, filter);
+            return Process(filter);
+        }
+        public Result<Filter<T, TKey>, T, TKey> HistoricAtExactTime(DateTime exactTime, Filter<T, TKey>? filter)
+        {
+            filter = PrepareFilter(HistoricFetchMode.AtExactTime, exactTime, null, filter);
+            return Process(filter);
+        }
+        public Result<Filter<T, TKey>, T, TKey> HistoricActiveBetween(DateTime startDate, DateTime endDate, Filter<T, TKey>? filter)
+        {
+            filter = PrepareFilter(HistoricFetchMode.ActiveBetween, startDate, endDate, filter);
+            return Process(filter);
+        }
+        public Result<Filter<T, TKey>, T, TKey> HistoricActiveThrough(DateTime startDate, DateTime endDate, Filter<T, TKey>? filter)
+        {
+            filter = PrepareFilter(HistoricFetchMode.ActiveThrough, startDate, endDate, filter);
+            return Process(filter);
         }
 
 

@@ -3,7 +3,7 @@ using DATA.Repository.Abstraction.Strategies;
 
 namespace DATA.Repository.Implementation.Strategies
 {
-    public class AtExactTimeStrategy<T, TKey> : IQueryStrategy<T, TKey> where T : BaseEntity<TKey>
+    public class AtExactTimeStrategy<T, TKey> : IQueryStrategy<T, TKey> where T : HistoricBaseEntity<TKey>
     {
         public HistoricFetchMode FetchMode => HistoricFetchMode.AtExactTime; public IQueryable<T> Apply(IQueryable<T> query, Filter<T, TKey> filter)
         {
