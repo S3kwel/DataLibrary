@@ -1,4 +1,6 @@
-﻿namespace DATA.Repository.Implementation
+﻿using DATA.Repository.Implementation.Models;
+
+namespace DATA.Repository.Implementation.Filtering
 {
     public class FilterGroup<T> where T : BaseEntity
     {

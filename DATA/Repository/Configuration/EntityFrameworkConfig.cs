@@ -1,13 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
-using DATA.Repository.Abstraction;
+using DATA.Repository.Implementation;
 
 namespace DATA.Repository.Configuration
 {
     public class Config {
 
         public class HistoricEntityConfiguration<T> : IEntityTypeConfiguration<T>
-          where T : class, IBaseEntity
+          where T : HistoricEntity
         {
             public void Configure(EntityTypeBuilder<T> builder)
             {

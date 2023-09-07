@@ -1,84 +1,40 @@
 ﻿using DATA.Repository.Abstraction;
-using System.Linq.Expressions;
+using DATA.Repository.Abstraction.Filtering;
+using DATA.Repository.Abstraction.Helpers;
 
 namespace DATA.Repository.Implementation
 {
-    public class Filter<T>
-        where T :BaseEntity
+    public class HistoricFilter<T> : BaseFilter<T>, IHistoricFilter, IFilter<T> where T : HistoricEntity
     {
-        #region Class Properties
-
         internal DateTime? ValidFrom { get; private set; }
         internal DateTime? ValidTo { get; private set; }
         internal Guid? VersionTag { get; private set; }
         internal HistoricFetchMode FetchMode { get; set; }
-        public List<FilterGroup<T>> LogicGroups { get; set; } = new();
-        public bool IncludeDeletedRecords { get; private set; } = false;
-        public int PageNumber { get;  set; } = 1;
-        public int PageSize { get;  set; } = 10;
-        public List<Expression<Func<T, bool>>> Includes { get; private set; } = new();
-        public List<OrderingCriteria> OrderingCriteria { get; private set; } = new();
-        #endregion
 
-        #region Fluent Setters 
-        internal Filter<T> WithValidFrom(DateTime date)
+        #region Fluent API
+        public HistoricFilter<T> WithValidFrom(DateTime date)
         {
             ValidFrom = date;
             return this;
         }
-        internal Filter<T> WithValidTo(DateTime date)
+        public HistoricFilter<T> WithValidTo(DateTime date)
         {
             ValidTo = date;
             return this;
         }
-        internal Filter<T> WithVersionTag(Guid tag)
+        public HistoricFilter<T> WithVersionTag(Guid tag)
         {
             VersionTag = tag;
             return this;
         }
-        internal Filter<T> WithFetchMode(HistoricFetchMode mode)
+        public HistoricFilter<T> WithFetchMode(HistoricFetchMode mode)
         {
             FetchMode = mode;
-            return this;
-        }
-        public Filter<T> AddLogicGroup(FilterGroup<T> group)
-        {
-            LogicGroups.Add(group);
-            return this;
-        }
-        public Filter<T> IncludeDeleted()
-        {
-            IncludeDeletedRecords = true;
-            return this;
-        }
-        public Filter<T> WithPageNumber(int pageNumber)
-        {
-            PageNumber = pageNumber;
-            return this;
-        }
-        public Filter<T> WithPageSize(int pageSize)
-        {
-            PageSize = pageSize;
-            return this;
-        }
-        public Filter<T> AddInclude(Expression<Func<T, bool>> include)
-        {
-            Includes.Add(include);
-            return this;
-        }
-        public Filter<T> AddOrderingCriteria(OrderingCriteria criteria)
-        {
-            OrderingCriteria.Add(criteria);
             return this;
         }
         #endregion
 
         #region Validation
-        public bool IsValid()
-        {
-            return IsValidDateRange() && IsValidVersionTag() && IsValidFetchMode();
-        }
-
         private bool IsValidDate(DateTime? date)
         {
             DateTime InvalidDate = DateTime.MinValue;
@@ -113,7 +69,12 @@ namespace DATA.Repository.Implementation
                     throw new InvalidOperationException($"Unknown fetch mode: {FetchMode}");
             }
         }
+        new public bool IsValid()
+        {
+            return IsValidDateRange() && IsValidVersionTag() && IsValidFetchMode();
+        }
         #endregion
-
     }
+
+
 }

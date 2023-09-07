@@ -1,11 +1,12 @@
 ﻿using DATA.Repository.Abstraction;
+using DATA.Repository.Implementation.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using static DATA.Repository.Configuration.Config;
 
 namespace DATA.Repository.Implementation
 {
-    public class BaseDBContext : DbContext, IBaseDBContext
+    public class DataDBContext : DbContext, IDataDBContext
     {
         static List<Type> _historicEntityTypesCache = new();
         static IEnumerable<Type> GetHistoricEntityTypes()

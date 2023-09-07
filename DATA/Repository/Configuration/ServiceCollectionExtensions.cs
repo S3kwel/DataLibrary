@@ -1,9 +1,9 @@
-﻿using DATA.Repository.Abstraction;
-using DATA.Repository.Implementation.Strategies;
+﻿using DATA.Repository.Implementation.Strategies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using DATA.Repository.Abstraction.Strategies;
+using DATA.Repository.Abstraction.Models;
 
 namespace DATA.Repository.Configuration
 {

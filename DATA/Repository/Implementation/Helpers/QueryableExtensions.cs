@@ -1,13 +1,15 @@
 ﻿using DATA.Repository.Abstraction;
+using DATA.Repository.Implementation.Filtering;
+using DATA.Repository.Implementation.Models;
 using LinqKit;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-namespace DATA.Repository.Implementation
+namespace DATA.Repository.Implementation.Helpers
 {
     public static class QueryableExtensions<T> where T : BaseEntity
     {
-        internal static IQueryable<T> ApplyEagerLoading(IQueryable<T> query, Filter<T> filter)
+        internal static IQueryable<T> ApplyEagerLoading(IQueryable<T> query, BaseFilter<T> filter)
         {
             if (filter.Includes.Count == 0 || filter == null) return query;
 
@@ -17,7 +19,7 @@ namespace DATA.Repository.Implementation
             }
             return query;
         }
-        internal static IQueryable<T> DisableQueryFilters(IQueryable<T> query, Filter<T> filter)
+        internal static IQueryable<T> DisableQueryFilters(IQueryable<T> query, BaseFilter<T> filter)
         {
             if (filter.IncludeDeletedRecords)
                 return query.IgnoreQueryFilters();
@@ -47,22 +49,26 @@ namespace DATA.Repository.Implementation
             }
             return query;
         }
-        internal static IQueryable<T> ApplyFilteringLogic(IQueryable<T> query, Filter<T> filter)
-        {
-            if (filter.LogicGroups.Count == 0 || filter.LogicGroups == null) return query;
-            foreach (var group in filter.LogicGroups)
-            {
-                if (group.Conditions == null || group.Conditions.Count == 0) continue;
 
-                var groupPredicate = PredicateBuilder.New<T>(false);
-                foreach (var condition in group.Conditions)
-                {
-                    groupPredicate = groupPredicate.Or(condition.Condition);
-                }
-                query = query.Where(groupPredicate);
+        internal static IQueryable<T> ApplyFilteringLogic(IQueryable<T> query, BaseFilter<T> filter)
+        {
+            if (!(filter is CompositeSpecification<T> specification)) return query;
+
+            var predicate = PredicateBuilder.New(specification.Criteria);
+
+            foreach (var andCriteria in specification.AndCriteria)
+            {
+                predicate = predicate.And(andCriteria);
             }
-            return query;
+
+            foreach (var orCriteria in specification.OrCriteria)
+            {
+                predicate = predicate.Or(orCriteria);
+            }
+
+            return query.Where(predicate);
         }
+
         internal static IQueryable<T> ApplySingleOrderingExpression(IQueryable<T> query, string propertyName, bool descending = false)
         {
             var orderingDelegate = ApplyOrderingExpression(propertyName);
@@ -81,7 +87,7 @@ namespace DATA.Repository.Implementation
 
             return Expression.Lambda<Func<T, object>>(conversion, parameter);
         }
-        internal static IQueryable<T> ApplyOrderingLogic(IQueryable<T> query, Filter<T> filter)
+        internal static IQueryable<T> ApplyOrderingLogic(IQueryable<T> query, BaseFilter<T> filter)
         {
             if (filter.OrderingCriteria != null)
             {
@@ -89,8 +95,8 @@ namespace DATA.Repository.Implementation
             }
             return query;
         }
-       
-       
+
+
 
     }
 

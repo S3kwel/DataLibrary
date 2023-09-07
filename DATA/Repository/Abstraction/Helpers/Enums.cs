@@ -1,4 +1,4 @@
-﻿namespace DATA.Repository.Abstraction
+﻿namespace DATA.Repository.Abstraction.Helpers
 {
     public enum HistoricFetchMode
     {

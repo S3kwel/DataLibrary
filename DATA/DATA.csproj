@@ -12,8 +12,4 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="7.0.10" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Repository\Abstraction\PrimaryKey\" />
-  </ItemGroup>
-
 </Project>

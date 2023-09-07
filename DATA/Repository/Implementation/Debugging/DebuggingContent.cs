@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace DATA.Repository.Implementation.Debugging.Interfaces
+namespace DATA.Repository.Implementation.Debugging
 {
     public class DebugContext
     {

@@ -1,4 +1,4 @@
-﻿namespace DATA.Repository.Implementation.Pagination
+﻿namespace DATA.Repository.Implementation
 {
     public class PaginationMetadata
     {

@@ -1,30 +1,50 @@
 ﻿using DATA.Repository.Abstraction;
 using DATA.Repository.Abstraction.Debugging;
 using DATA.Repository.Abstraction.Helpers;
+using DATA.Repository.Abstraction.Strategies;
 using DATA.Repository.Implementation.Debugging;
 using DATA.Repository.Implementation.Helpers;
-using DATA.Repository.Implementation.Models;
-using Microsoft.EntityFrameworkCore;
+using System.Data.Entity;
 
 namespace DATA.Repository.Implementation
 {
-    public class Repository<T> : IDebuggableRepository<T>, IRepository<T> where T : BaseEntity
+    public class HistoricRepository<T> : IDebuggableRepository<T>, IHistoricRepository<T> where T : HistoricEntity
     {
         private readonly DbContext _dbContext;
+        private readonly IEnumerable<IQueryStrategy<T>> _queryStrategies;
         private readonly IDebugStrategy<T> _debugStrategy;
         public bool UseDefaultDebugging { get; set; } = true;
         public Action<IQueryable<T?>, BaseFilter<T>, DebugContext>? BeforeProcessing { get; set; }
         public Action<IQueryable<T?>, BaseFilter<T>, DebugContext>? AfterProcessing { get; set; }
 
-        public Repository(DbContext context,
+        public HistoricRepository(DbContext context,
+                          IEnumerable<IQueryStrategy<T>> strategies,
                           IDebugStrategy<T> debugStrategy)
         {
             _dbContext = context;
+            _queryStrategies = strategies;
             _debugStrategy = debugStrategy ?? new DefaultDebugStrategy<T>();
         }
 
+        private IQueryStrategy<T>? GetStrategyForFetchMode(HistoricFetchMode mode)
+        {
+
+            return _queryStrategies.FirstOrDefault(s => s.FetchMode == mode);
+        }
 
 
+        private HistoricFilter<T> PrepareFilter(HistoricFetchMode fetchMode, DateTime? validFrom = null, DateTime? validTo = null, HistoricFilter<T>? filter = null)
+        {
+            filter ??= new HistoricFilter<T>().WithFetchMode(fetchMode);
+
+            if (validFrom.HasValue)
+                filter.WithValidFrom(validFrom.Value);
+
+            if (validTo.HasValue)
+                filter.WithValidTo(validTo.Value);
+
+            return filter;
+        }
 
         internal RequestStatus DetermineRequestStatus(IList<T> results, BaseFilter<T> filter)
         {
@@ -48,7 +68,8 @@ namespace DATA.Repository.Implementation
 
             return RequestStatus.FAILED; // default
         }
-        private Result<BaseFilter<T>, T> Process(BaseFilter<T> filter)
+
+        private Result<HistoricFilter<T>, T> Process(HistoricFilter<T> filter)
         {
             //For debug hooks, etc. 
             var debugContext = new DebugContext();
@@ -66,6 +87,11 @@ namespace DATA.Repository.Implementation
             query = QueryableExtensions<T>.DisableQueryFilters(query, filter);
             query = QueryableExtensions<T>.ApplyEagerLoading(query, filter);
             _debugStrategy.AfterHook(query, filter, debugContext, "PreProcessing");
+
+            // Apply historic fetch mode strategy.  
+            _debugStrategy.BeforeHook(query, filter, debugContext, "HistoricFetching");
+            query = GetStrategyForFetchMode(filter.FetchMode)!.Apply(query, filter);
+            _debugStrategy.AfterHook(query, filter, debugContext, "HistoricFetching");
 
             // Post-Processing
             _debugStrategy.BeforeHook(query, filter, debugContext, "PostProcessing");
@@ -95,7 +121,7 @@ namespace DATA.Repository.Implementation
                 TotalCount = totalCount
             };
 
-            return new Result<BaseFilter<T>, T>(filter, status, (final.Count > 0) ? null : convertResults)
+            return new Result<HistoricFilter<T>, T>(filter, status, (final.Count > 0) ? null : convertResults)
             {
                 Pagination = pagination,
                 Status = status,
@@ -103,98 +129,42 @@ namespace DATA.Repository.Implementation
             };
         }
 
-        public Result<BaseFilter<T>, T> ApplyFilter(BaseFilter<T> filter)
+
+        //Bifurcating the repository for historic and not w/ different clases.  Watch for redundant inheritance patterns!
+        //You got a lot done last time! Specification pattern in the filters now.  May need some tweaking.  What doesn't. 
+
+        //Shoring up repo access. 
+        public Result<HistoricFilter<T>, T> HistoricAllTime(HistoricFilter<T>? filter = null)
         {
+            filter = PrepareFilter(HistoricFetchMode.AllTime, null, null, filter);
             return Process(filter);
         }
 
-
-        public SimpleResult<T> Update(T entity)
+        public Result<HistoricFilter<T>, T> HistoricActiveWithin(DateTime validFrom, DateTime validTo, HistoricFilter<T>? filter = null)
         {
-            if (entity == null)
-            {
-                return new SimpleResult<T>
-                {
-                    Status = RequestStatus.FAILED,
-                    Message = "The entity to be updated is null."
-                };
-            }
-
-            try
-            {
-                _dbContext.Update(entity);
-                return new SimpleResult<T>
-                {
-                    Status = RequestStatus.SUCCEEDED,
-                    Message = "Entity successfully updated."
-                };
-            }
-            catch (Exception ex)
-            {
-                return new SimpleResult<T>
-                {
-                    Status = RequestStatus.FAILED,
-                    Message = $"Failed to update entity. Error: {ex.Message}"
-                };
-            }
+            filter = PrepareFilter(HistoricFetchMode.ActiveWithin, validFrom, validTo, filter);
+            return Process(filter);
         }
-        public SimpleResult<T> Add(T entity)
+        public Result<HistoricFilter<T>, T> HistoricAtExactTime(DateTime exactTime, HistoricFilter<T>? filter)
         {
-            if (entity == null)
-            {
-                return new SimpleResult<T>
-                {
-                    Status = RequestStatus.FAILED,
-                    Message = "The entity to be added is null."
-                };
-            }
-
-            try
-            {
-                _dbContext.Add(entity);
-                return new SimpleResult<T>
-                {
-                    Status = RequestStatus.SUCCEEDED,
-                    Message = "Entity successfully added."
-                };
-            }
-            catch (Exception ex)
-            {
-                return new SimpleResult<T>
-                {
-                    Status = RequestStatus.FAILED,
-                    Message = $"Failed to add entity. Error: {ex.Message}"
-                };
-            }
+            filter = PrepareFilter(HistoricFetchMode.AtExactTime, exactTime, null, filter);
+            return Process(filter);
         }
-        public SimpleResult<T> Delete(T entity)
+        public Result<HistoricFilter<T>, T> HistoricActiveBetween(DateTime startDate, DateTime endDate, HistoricFilter<T>? filter)
         {
-            if (entity == null)
-            {
-                return new SimpleResult<T>
-                {
-                    Status = RequestStatus.FAILED,
-                    Message = "The entity to be deleted is null."
-                };
-            }
+            filter = PrepareFilter(HistoricFetchMode.ActiveBetween, startDate, endDate, filter);
+            return Process(filter);
+        }
+        public Result<HistoricFilter<T>, T> HistoricActiveThrough(DateTime startDate, DateTime endDate, HistoricFilter<T>? filter)
+        {
+            filter = PrepareFilter(HistoricFetchMode.AllTime, startDate, endDate, filter);
+            return Process(filter);
+        }
 
-            try
-            {
-                _dbContext.Remove(entity);
-                return new SimpleResult<T>
-                {
-                    Status = RequestStatus.SUCCEEDED,
-                    Message = "Entity successfully deleted."
-                };
-            }
-            catch (Exception ex)
-            {
-                return new SimpleResult<T>
-                {
-                    Status = RequestStatus.FAILED,
-                    Message = $"Failed to delete entity. Error: {ex.Message}"
-                };
-            }
+        public Result<HistoricFilter<T>, T> ApplyFilter(HistoricFilter<T> filter)
+        {
+            filter = PrepareFilter(filter.FetchMode, filter.ValidFrom, filter.ValidTo);
+            return Process(filter);
         }
 
     }
