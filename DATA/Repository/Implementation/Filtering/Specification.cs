@@ -4,11 +4,9 @@ using System.Linq.Expressions;
 
 namespace DATA.Repository.Implementation.Filtering
 {
-    //Determine if we need this...
-    //
-    public abstract class CompositeSpecification<T> : ISpecification<T> where T : BaseEntity
+    public abstract class Specification<T> : ISpecification<T> where T : BaseEntity
     {
-        public virtual Expression<Func<T, bool>> Criteria { get; } = e => true;
+        public virtual Expression<Func<T, bool>> Criteria { get; internal set; } = e => true;
         public List<Expression<Func<T, bool>>> AndCriteria { get; } = new List<Expression<Func<T, bool>>>();
         public List<Expression<Func<T, bool>>> OrCriteria { get; } = new List<Expression<Func<T, bool>>>();
 
@@ -22,6 +20,11 @@ namespace DATA.Repository.Implementation.Filtering
         {
             OrCriteria.Add(specification.Criteria);
             return this;
+        }
+
+        public Specification()
+        {
+           
         }
     }
 

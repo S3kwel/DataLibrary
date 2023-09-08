@@ -52,7 +52,7 @@ namespace DATA.Repository.Implementation.Helpers
 
         internal static IQueryable<T> ApplyFilteringLogic(IQueryable<T> query, BaseFilter<T> filter)
         {
-            if (!(filter is CompositeSpecification<T> specification)) return query;
+            if (!(filter is Specification<T> specification)) return query;
 
             var predicate = PredicateBuilder.New(specification.Criteria);
 
