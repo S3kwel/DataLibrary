@@ -28,7 +28,7 @@ namespace DATA.Repository.Configuration
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 
-            var entityTypes = typeof(TContext).Assembly.GetTypes().Where(t => !t.IsAbstract && typeof(IBaseEntity).IsAssignableFrom(t)).ToList();
+            var entityTypes = typeof(TContext).Assembly.GetTypes().Where(t => !t.IsAbstract && typeof(HistoricEntity).IsAssignableFrom(t)).ToList();
 
             foreach (var entityType in entityTypes)
             {

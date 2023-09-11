@@ -61,7 +61,9 @@ namespace DATA.Repository.Implementation
         {
             ChangeTracker.LazyLoadingEnabled = false;
         }
-        
+
+        public DataDBContext() { }
+
         public override int SaveChanges()
         {
             ApplySoftDeletes();

@@ -10,6 +10,9 @@ namespace Spike
         {
         }
 
+        public SpikeContext() { }   
+       
+
         public DbSet<DocumentV1> DocumentsV1 { get; set; }
         public DbSet<AuthorV1> AuthorsV1 { get; set; }
 
