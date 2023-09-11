@@ -34,11 +34,14 @@ namespace DATA.Repository.Implementation
             _historicEntityTypesCache = historicEntities;
             return historicEntities;
         }
+
+     
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
             var historicEntities = GetHistoricEntityTypes();
 
+            //Need this for baseEntities! 
             foreach (var type in historicEntities)
             {
                 var configurationInstance = Activator.CreateInstance(typeof(HistoricEntityConfiguration<>).MakeGenericType(type));
@@ -53,6 +56,12 @@ namespace DATA.Repository.Implementation
             }
         }
 
+        public DataDBContext(DbContextOptions<DataDBContext> options)
+        : base(options)
+        {
+            ChangeTracker.LazyLoadingEnabled = false;
+        }
+        
         public override int SaveChanges()
         {
             ApplySoftDeletes();

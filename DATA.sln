@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34018.315
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DATA", "DATA\DATA.csproj", "{244EE4B2-4944-4BD1-9999-C0E7FD1200F0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DATA", "DATA\DATA.csproj", "{244EE4B2-4944-4BD1-9999-C0E7FD1200F0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Spike", "Spike\Spike.csproj", "{A0B2FF73-C322-4713-AA80-6553498DAE67}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{244EE4B2-4944-4BD1-9999-C0E7FD1200F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{244EE4B2-4944-4BD1-9999-C0E7FD1200F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{244EE4B2-4944-4BD1-9999-C0E7FD1200F0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A0B2FF73-C322-4713-AA80-6553498DAE67}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0B2FF73-C322-4713-AA80-6553498DAE67}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A0B2FF73-C322-4713-AA80-6553498DAE67}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A0B2FF73-C322-4713-AA80-6553498DAE67}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
