@@ -1,10 +1,11 @@
 ﻿using DATA.Repository.Implementation;
 using DATA.Repository.Implementation.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace DATA.Repository.Abstraction
 {
-    public interface IUnitOfWork
+    public interface IUnitOfWork<TContext> where TContext : DbContext
     {
         IDbContextTransaction BeginTransaction();
         void Commit();

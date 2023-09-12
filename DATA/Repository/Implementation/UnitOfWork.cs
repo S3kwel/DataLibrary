@@ -8,13 +8,13 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace DATA.Repository.Implementation
 {
-    public class UnitOfWork : IDisposable, IUnitOfWork
+    public class UnitOfWork<TContext> : IDisposable, IUnitOfWork<TContext> where TContext : DbContext
     {
-        private readonly DbContext _dbContext;
+        private readonly TContext _dbContext;
         private readonly Dictionary<Type, object> _repositories;
         private readonly IServiceProvider _serviceProvider;
 
-        public UnitOfWork(DbContext dbContext, IServiceProvider provider)
+        public UnitOfWork(TContext dbContext, IServiceProvider provider)
         {
             _dbContext = dbContext;
             _repositories = new Dictionary<Type, object>();

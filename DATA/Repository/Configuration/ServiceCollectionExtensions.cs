@@ -6,6 +6,7 @@ using DATA.Repository.Abstraction.Strategies;
 using DATA.Repository.Abstraction.Models;
 using DATA.Repository.Implementation;
 using DATA.Repository.Abstraction;
+using System.Diagnostics;
 
 namespace DATA.Repository.Configuration
 {
@@ -19,13 +20,13 @@ namespace DATA.Repository.Configuration
         /// <param name="services">The IServiceCollection to add the services to.</param>
         /// <param name="options">Configuration options for the DbContext.</param>
         public static void AddData<TContext>(this IServiceCollection services, Action<DbContextOptionsBuilder> options)
-        where TContext : DataDBContext
+        where TContext : DataDBContext<TContext>
         {
             //DBContext and related.  
             services.AddDbContext<TContext>(options);
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped(typeof(IHistoricRepository<>), typeof(HistoricRepository<>));
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWork<>));    
 
 
             var entityTypes = typeof(TContext).Assembly.GetTypes().Where(t => !t.IsAbstract && typeof(HistoricEntity).IsAssignableFrom(t)).ToList();
@@ -37,6 +38,8 @@ namespace DATA.Repository.Configuration
                 var atExactTimeType = typeof(AtExactTimeStrategy<>).MakeGenericType(entityType);
                 var activeBetweenStrategy = typeof(ActiveBetweenStrategy<>).MakeGenericType(entityType);
                 var activeThroughStrategy = typeof(ActiveThroughStrategy<>).MakeGenericType(entityType);
+
+                
 
                 services.AddTransient(typeof(IQueryStrategy<>).MakeGenericType(entityType), allTimeStrategyType);
                 services.AddTransient(typeof(IQueryStrategy<>).MakeGenericType(entityType), activeWithinStrategyType);

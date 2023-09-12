@@ -6,7 +6,8 @@ using static DATA.Repository.Configuration.Config;
 
 namespace DATA.Repository.Implementation
 {
-    public class DataDBContext : DbContext, IDataDBContext
+    public class DataDBContext<TContext> : DbContext, IDataDBContext
+        where TContext : DbContext
     {
         static List<Type> _historicEntityTypesCache = new();
         static IEnumerable<Type> GetHistoricEntityTypes()
@@ -56,7 +57,7 @@ namespace DATA.Repository.Implementation
             }
         }
 
-        public DataDBContext(DbContextOptions<DataDBContext> options)
+        public DataDBContext(DbContextOptions<TContext> options)
         : base(options)
         {
             ChangeTracker.LazyLoadingEnabled = false;

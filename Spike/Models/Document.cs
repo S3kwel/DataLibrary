@@ -22,6 +22,6 @@ namespace Spike.Models
 
     public class DocumentHistoricV1 : HistoricDocumentBase
     {
-        public virtual IEnumerable<AuthorHistoricV1>? AuthorsHistoricV1 { get; set; }
+        public virtual IEnumerable<AuthorHistoricV1>?AuthorsHistoricV1 { get; set; }
     }
 }
