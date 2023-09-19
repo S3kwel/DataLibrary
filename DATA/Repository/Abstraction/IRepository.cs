@@ -1,9 +1,9 @@
-﻿using DATA.Repository.Implementation;
-using DATA.Repository.Implementation.Models;
+﻿using DATA.Repository.Abstraction.Models;
+using DATA.Repository.Implementation;
 
 namespace DATA.Repository.Abstraction
 {
-    public interface IRepository<T> where T : BaseEntity
+    public interface IRepository<T> where T : IBaseEntity
     {
         SimpleResult<T> Add(T entity);
         SimpleResult<T> Add(List<T> entities);

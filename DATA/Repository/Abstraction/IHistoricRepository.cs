@@ -1,9 +1,9 @@
-﻿using DATA.Repository.Implementation;
-using DATA.Repository.Implementation.Debugging;
+﻿using DATA.Repository.Abstraction.Models;
+using DATA.Repository.Implementation;
 
 namespace DATA.Repository.Abstraction
 {
-    public interface IHistoricRepository<T> where T : HistoricEntity
+    public interface IHistoricRepository<T> where T : class, IHistoricEntity, IBaseEntity
     {
         Result<HistoricFilter<T>, T> ApplyFilter(HistoricFilter<T> filter);
         Task<Result<HistoricFilter<T>, T>> ApplyFilterAsync(HistoricFilter<T> filter);

@@ -4,7 +4,7 @@ using DATA.Repository.Abstraction.Helpers;
 
 namespace DATA.Repository.Implementation
 {
-    public class HistoricFilter<T> : BaseFilter<T>, IHistoricFilter, IFilter<T> where T : HistoricEntity
+    public class HistoricFilter<T> : BaseFilter<T>, IHistoricFilter, IFilter<T> where T : IHistoricEntity
     {
         internal DateTime? ValidFrom { get; private set; }
         internal DateTime? ValidTo { get; private set; }

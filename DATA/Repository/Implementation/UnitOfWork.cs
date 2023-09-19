@@ -1,7 +1,6 @@
 ﻿using DATA.Repository.Abstraction;
+using DATA.Repository.Abstraction.Models;
 using DATA.Repository.Abstraction.Strategies;
-using DATA.Repository.Implementation.Debugging;
-using DATA.Repository.Implementation.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,7 +24,7 @@ namespace DATA.Repository.Implementation
 
         }
 
-        public IRepository<T> Repository<T>() where T : BaseEntity
+        public IRepository<T> Repository<T>() where T : class, IBaseEntity
         {
             if (_repositories.ContainsKey(typeof(T)))
             {
@@ -45,7 +44,7 @@ namespace DATA.Repository.Implementation
             return repo;
         }
 
-        public IHistoricRepository<T> HistoricRepository<T>() where T : HistoricEntity
+        public IHistoricRepository<T> HistoricRepository<T>() where T : class, IHistoricEntity
         {
             if (_serviceProvider == null)
                 throw new InvalidOperationException("Unit of Work must be used in a Dependency Injection Container!");

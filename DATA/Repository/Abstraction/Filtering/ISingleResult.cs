@@ -1,11 +1,11 @@
 ﻿using DATA.Repository.Abstraction.Helpers;
+using DATA.Repository.Abstraction.Models;
 using DATA.Repository.Implementation;
-using DATA.Repository.Implementation.Models;
 
 namespace DATA.Repository.Abstraction.Filtering
 {
     public interface ISingleResult<T>
-        where T : BaseEntity
+        where T : IBaseEntity
     {
         bool IsHistoric { get; }
         RequestStatus Status { get; }

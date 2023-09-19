@@ -5,7 +5,7 @@
 namespace Spike.Migrations
 {
     /// <inheritdoc />
-    public partial class historic : Migration
+    public partial class test2222 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

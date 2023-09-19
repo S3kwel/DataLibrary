@@ -1,13 +1,13 @@
 ﻿using DATA.Repository.Abstraction;
+using DATA.Repository.Abstraction.Models;
 using DATA.Repository.Implementation.Filtering;
-using DATA.Repository.Implementation.Models;
 using LinqKit;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace DATA.Repository.Implementation.Helpers
 {
-    public static class QueryableExtensions<T> where T : BaseEntity
+    public static class QueryableExtensions<T> where T : class, IBaseEntity
     {
         internal static IQueryable<T> ApplyEagerLoading(IQueryable<T> query, BaseFilter<T> filter)
         {

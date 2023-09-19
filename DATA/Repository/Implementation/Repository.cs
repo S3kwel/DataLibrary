@@ -1,14 +1,13 @@
 ﻿using DATA.Repository.Abstraction;
-using DATA.Repository.Abstraction.Debugging;
 using DATA.Repository.Abstraction.Helpers;
+using DATA.Repository.Abstraction.Models;
 using DATA.Repository.Implementation.Debugging;
 using DATA.Repository.Implementation.Helpers;
-using DATA.Repository.Implementation.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace DATA.Repository.Implementation
 {
-    public class Repository<T> : DebuggableRepository<T>, IRepository<T> where T : BaseEntity
+    public class Repository<T> : DebuggableRepository<T>, IRepository<T> where T : class, IBaseEntity
     {
         private readonly DbContext _dbContext;
         private readonly IDebugStrategy<T> _debugStrategy;

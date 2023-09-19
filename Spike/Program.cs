@@ -1,7 +1,6 @@
 using DATA.Repository.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Spike;
-using System.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 

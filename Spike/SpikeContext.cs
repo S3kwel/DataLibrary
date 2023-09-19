@@ -14,19 +14,20 @@ namespace Spike
        
 
         public DbSet<DocumentV1> DocumentsV1 { get; set; }
+        public DbSet<DocumentHistoricV1> DocumentHistoricV1 { get; set; }
         public DbSet<AuthorV1> AuthorsV1 { get; set; }
-        public DbSet<DocumentHistoricV1> DocumentsHistoricV1 { get; set; }
-        public DbSet<AuthorHistoricV1> AuthorsHistoricV1 { get; set; }
+        //public DbSet<AuthorHistoricV1> AuthorHistoricV1 { get; set; }
+        //public DbSet<DocumenV1AuthorV1HJoin> DocumentAuthorsV1H { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
             //Author < -- > Document
-            modelBuilder.Entity<AuthorV1>().HasMany(e => e.DocumentsV1).WithMany(e => e.AuthorsV1);
+            //modelBuilder.Entity<AuthorV1>().HasMany(e => e.DocumentsV1).WithMany(e => e.AuthorsV1);
             
             //Historic Author < -- > Historic Document
-            modelBuilder.Entity<AuthorHistoricV1>().HasMany(e => e.DocumentsHistoricV1).WithMany(e => e.AuthorsHistoricV1);
+            //modelBuilder.Entity<AuthorHistoricV1>().HasMany(e => e.DocumentsV1).WithMany(e => e.AuthorsV1);
         }
     }
 }

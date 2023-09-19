@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Spike;
 
@@ -11,9 +12,11 @@ using Spike;
 namespace Spike.Migrations
 {
     [DbContext(typeof(SpikeContext))]
-    partial class SpikeContextModelSnapshot : ModelSnapshot
+    [Migration("20230919183030_initial4")]
+    partial class initial4
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -91,7 +94,7 @@ namespace Spike.Migrations
 
                     b.ToTable((string)null);
 
-                    b.ToView("AuthorHistoricV1", (string)null);
+                    b.ToView("AuthorsHistoricV1", (string)null);
                 });
 
             modelBuilder.Entity("Spike.Models.AuthorV1", b =>
@@ -218,7 +221,7 @@ namespace Spike.Migrations
 
                     b.ToTable((string)null);
 
-                    b.ToView("DocumentHistoricV1", (string)null);
+                    b.ToView("DocumentsHistoricV1", (string)null);
                 });
 
             modelBuilder.Entity("Spike.Models.DocumentV1", b =>

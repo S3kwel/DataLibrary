@@ -12,8 +12,8 @@ using Spike;
 namespace Spike.Migrations
 {
     [DbContext(typeof(SpikeContext))]
-    [Migration("20230912030539_historic2")]
-    partial class historic2
+    [Migration("20230919180922_test1")]
+    partial class test1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,21 +25,6 @@ namespace Spike.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("AuthorHistoricV1DocumentHistoricV1", b =>
-                {
-                    b.Property<Guid>("AuthorsHistoricV1Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("DocumentsHistoricV1Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("AuthorsHistoricV1Id", "DocumentsHistoricV1Id");
-
-                    b.HasIndex("DocumentsHistoricV1Id");
-
-                    b.ToTable("AuthorHistoricV1DocumentHistoricV1");
-                });
-
             modelBuilder.Entity("AuthorV1DocumentV1", b =>
                 {
                     b.Property<Guid>("AuthorsV1Id")
@@ -48,26 +33,59 @@ namespace Spike.Migrations
                     b.Property<Guid>("DocumentsV1Id")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime>("PeriodEnd")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodEnd");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodStart");
+
                     b.HasKey("AuthorsV1Id", "DocumentsV1Id");
 
                     b.HasIndex("DocumentsV1Id");
 
                     b.ToTable("AuthorV1DocumentV1");
+
+                    b.ToTable(tb => tb.IsTemporal(ttb =>
+                            {
+                                ttb.UseHistoryTable("AuthorV1DocumentV1History");
+                                ttb
+                                    .HasPeriodStart("PeriodStart")
+                                    .HasColumnName("PeriodStart");
+                                ttb
+                                    .HasPeriodEnd("PeriodEnd")
+                                    .HasColumnName("PeriodEnd");
+                            }));
                 });
 
-            modelBuilder.Entity("DATA.Repository.Implementation.HistoricEntity", b =>
+            modelBuilder.Entity("Spike.Models.AuthorHistoricV1", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("PeriodEnd")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("PeriodStart")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("StringId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("VersionTag")
                         .HasColumnType("uniqueidentifier");
@@ -76,7 +94,7 @@ namespace Spike.Migrations
 
                     b.ToTable((string)null);
 
-                    b.ToView("HistoricEntityHistory", (string)null);
+                    b.ToView("AuthorsHistoricV1", (string)null);
                 });
 
             modelBuilder.Entity("Spike.Models.AuthorV1", b =>
@@ -96,12 +114,73 @@ namespace Spike.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("PeriodEnd")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodEnd");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodStart");
+
+                    b.Property<string>("StringId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<Guid>("VersionTag")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
-                    b.ToTable("AuthorsV1");
+                    b.ToTable("AuthorV1", (string)null);
+
+                    b.ToTable(tb => tb.IsTemporal(ttb =>
+                            {
+                                ttb.UseHistoryTable("AuthorHistoricV1");
+                                ttb
+                                    .HasPeriodStart("PeriodStart")
+                                    .HasColumnName("PeriodStart");
+                                ttb
+                                    .HasPeriodEnd("PeriodEnd")
+                                    .HasColumnName("PeriodEnd");
+                            }));
+                });
+
+            modelBuilder.Entity("Spike.Models.DocumentHistoricV1", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("PeriodEnd")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("StringId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("VersionTag")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("DocumentsHistoricV1", (string)null);
                 });
 
             modelBuilder.Entity("Spike.Models.DocumentV1", b =>
@@ -117,55 +196,17 @@ namespace Spike.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("VersionTag")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("DocumentsV1");
-                });
-
-            modelBuilder.Entity("Spike.Models.HistoricAuthorBase", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("PeriodEnd")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodEnd");
 
                     b.Property<DateTime>("PeriodStart")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodStart");
 
-                    b.Property<Guid>("VersionTag")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.ToTable((string)null);
-
-                    b.ToView("HistoricAuthorBaseHistory", (string)null);
-                });
-
-            modelBuilder.Entity("Spike.Models.HistoricDocumentBase", b =>
-                {
-                    b.HasBaseType("DATA.Repository.Implementation.HistoricEntity");
-
-                    b.Property<string>("Description")
+                    b.Property<string>("StringId")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -173,36 +214,23 @@ namespace Spike.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.ToView("HistoricDocumentBaseHistory", (string)null);
-                });
+                    b.Property<Guid>("VersionTag")
+                        .HasColumnType("uniqueidentifier");
 
-            modelBuilder.Entity("Spike.Models.AuthorHistoricV1", b =>
-                {
-                    b.HasBaseType("Spike.Models.HistoricAuthorBase");
+                    b.HasKey("Id");
 
-                    b.ToView("AuthorHistoricV1History", (string)null);
-                });
+                    b.ToTable("DocumentV1", (string)null);
 
-            modelBuilder.Entity("Spike.Models.DocumentHistoricV1", b =>
-                {
-                    b.HasBaseType("Spike.Models.HistoricDocumentBase");
-
-                    b.ToView("DocumentHistoricV1History", (string)null);
-                });
-
-            modelBuilder.Entity("AuthorHistoricV1DocumentHistoricV1", b =>
-                {
-                    b.HasOne("Spike.Models.AuthorHistoricV1", null)
-                        .WithMany()
-                        .HasForeignKey("AuthorsHistoricV1Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Spike.Models.DocumentHistoricV1", null)
-                        .WithMany()
-                        .HasForeignKey("DocumentsHistoricV1Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.ToTable(tb => tb.IsTemporal(ttb =>
+                            {
+                                ttb.UseHistoryTable("DocumentHistoricV1");
+                                ttb
+                                    .HasPeriodStart("PeriodStart")
+                                    .HasColumnName("PeriodStart");
+                                ttb
+                                    .HasPeriodEnd("PeriodEnd")
+                                    .HasColumnName("PeriodEnd");
+                            }));
                 });
 
             modelBuilder.Entity("AuthorV1DocumentV1", b =>

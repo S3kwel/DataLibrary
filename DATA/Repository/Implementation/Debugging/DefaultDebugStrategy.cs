@@ -1,10 +1,10 @@
 ﻿using DATA.Repository.Abstraction;
-using DATA.Repository.Implementation.Models;
+using DATA.Repository.Abstraction.Models;
 using System.Diagnostics;
 
 namespace DATA.Repository.Implementation.Debugging
 {
-    public class DefaultDebugStrategy<T> : IDebugStrategy<T> where T : BaseEntity
+    public class DefaultDebugStrategy<T> : IDebugStrategy<T> where T : IBaseEntity
     {
         public void BeforeHook(IQueryable<T> query, BaseFilter<T> filter, DebugContext context, string sectionName)
         {

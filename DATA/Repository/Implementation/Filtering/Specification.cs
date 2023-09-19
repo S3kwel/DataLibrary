@@ -1,10 +1,10 @@
 ﻿using DATA.Repository.Abstraction;
-using DATA.Repository.Implementation.Models;
+using DATA.Repository.Abstraction.Models;
 using System.Linq.Expressions;
 
 namespace DATA.Repository.Implementation.Filtering
 {
-    public abstract class Specification<T> : ISpecification<T> where T : BaseEntity
+    public abstract class Specification<T> : ISpecification<T> where T : IBaseEntity
     {
         public virtual Expression<Func<T, bool>> Criteria { get; internal set; } = e => true;
         public List<Expression<Func<T, bool>>> AndCriteria { get; } = new List<Expression<Func<T, bool>>>();

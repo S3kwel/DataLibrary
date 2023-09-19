@@ -1,5 +1,4 @@
 ﻿using DATA.Repository.Abstraction;
-using DATA.Repository.Abstraction.Debugging;
 using DATA.Repository.Abstraction.Helpers;
 using DATA.Repository.Abstraction.Strategies;
 using DATA.Repository.Implementation.Debugging;
@@ -8,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DATA.Repository.Implementation
 {
-    public class HistoricRepository<T> : DebuggableRepository<T>, IHistoricRepository<T> where T : HistoricEntity
+    public class HistoricRepository<T> : DebuggableRepository<T>, IHistoricRepository<T> where T : class, IHistoricEntity
     {
         private readonly DbContext _dbContext;
         private readonly IEnumerable<IQueryStrategy<T>> _queryStrategies;

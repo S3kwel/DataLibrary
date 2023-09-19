@@ -1,12 +1,12 @@
 ﻿using DATA.Repository.Implementation.Strategies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using System.Reflection;
 using DATA.Repository.Abstraction.Strategies;
 using DATA.Repository.Abstraction.Models;
 using DATA.Repository.Implementation;
 using DATA.Repository.Abstraction;
-using System.Diagnostics;
+using DATA.Repository.Implementation.Debugging;
+using Microsoft.Extensions.Logging;
 
 namespace DATA.Repository.Configuration
 {
@@ -22,6 +22,12 @@ namespace DATA.Repository.Configuration
         public static void AddData<TContext>(this IServiceCollection services, Action<DbContextOptionsBuilder> options)
         where TContext : DataDBContext<TContext>
         {
+            services.AddLogging(loggingBuilder =>
+            {
+                loggingBuilder.AddConsole()
+                             .SetMinimumLevel(LogLevel.Information); // Adjust log level as needed
+            });
+
             //DBContext and related.  
             services.AddDbContext<TContext>(options);
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
@@ -29,7 +35,7 @@ namespace DATA.Repository.Configuration
             services.AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWork<>));    
 
 
-            var entityTypes = typeof(TContext).Assembly.GetTypes().Where(t => !t.IsAbstract && typeof(HistoricEntity).IsAssignableFrom(t)).ToList();
+            var entityTypes = typeof(TContext).Assembly.GetTypes().Where(t => !t.IsAbstract && typeof(IHistoricEntity).IsAssignableFrom(t)).ToList();
 
             foreach (var entityType in entityTypes)
             {
@@ -39,18 +45,25 @@ namespace DATA.Repository.Configuration
                 var activeBetweenStrategy = typeof(ActiveBetweenStrategy<>).MakeGenericType(entityType);
                 var activeThroughStrategy = typeof(ActiveThroughStrategy<>).MakeGenericType(entityType);
 
-                
-
                 services.AddTransient(typeof(IQueryStrategy<>).MakeGenericType(entityType), allTimeStrategyType);
                 services.AddTransient(typeof(IQueryStrategy<>).MakeGenericType(entityType), activeWithinStrategyType);
                 services.AddTransient(typeof(IQueryStrategy<>).MakeGenericType(entityType), atExactTimeType);
                 services.AddTransient(typeof(IQueryStrategy<>).MakeGenericType(entityType), activeBetweenStrategy);
                 services.AddTransient(typeof(IQueryStrategy<>).MakeGenericType(entityType), activeThroughStrategy);
             }
+
+            var AllEntityTypes = typeof(TContext).Assembly.GetTypes().Where(t => !t.IsAbstract && typeof(IBaseEntity).IsAssignableFrom(t)).ToList();
+
+            foreach(var type in AllEntityTypes)
+            {
+                var allTimeStrategyType = typeof(DefaultDebugStrategy<>).MakeGenericType(type);
+                services.AddTransient(typeof(IDebugStrategy<>).MakeGenericType(type), allTimeStrategyType);
+            }
+
+
         }
 
-
-
+       
     }
 
     

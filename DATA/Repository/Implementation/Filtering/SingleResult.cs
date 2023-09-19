@@ -1,12 +1,12 @@
 ﻿using DATA.Repository.Abstraction.Filtering;
 using DATA.Repository.Abstraction.Helpers;
+using DATA.Repository.Abstraction.Models;
 using DATA.Repository.Implementation;
-using DATA.Repository.Implementation.Models;
 
 namespace DATA.Repository.Abstraction
 {
     public record SingleResult<T>(T? Value) : ISingleResult<T>
-    where T : BaseEntity
+    where T : IBaseEntity
     { 
         public T? Value { get; private set; } = Value;
         private IFilter<T> _filter { get; } = new BaseFilter<T>();
@@ -39,11 +39,11 @@ namespace DATA.Repository.Abstraction
 
     }
 
-    public interface IFilter<T> where T : BaseEntity
+    public interface IFilter<T> where T : IBaseEntity
     {
     }
 
-    public interface IResult<T> where T: BaseEntity
+    public interface IResult<T> where T: IBaseEntity
     {
         RequestStatus Status { get; set; }
         public bool Succeeded { get;}
@@ -52,7 +52,7 @@ namespace DATA.Repository.Abstraction
 
     public class Result<TFilter, T>: IResult<T>
         where TFilter : BaseFilter<T>
-        where T : BaseEntity
+        where T : IBaseEntity
     {
         public PaginationMetadata? Pagination { get; set; }
 

@@ -1,10 +1,10 @@
-﻿using DATA.Repository.Implementation;
-using DATA.Repository.Implementation.Models;
+﻿using DATA.Repository.Abstraction.Models;
+using DATA.Repository.Implementation;
 using System.Linq.Expressions;
 
 namespace DATA.Repository.Abstraction.Filtering
 {
-    public interface IBaseFilter<T> where T : BaseEntity
+    public interface IBaseFilter<T> where T : IBaseEntity
     {
         bool IncludeDeletedRecords { get; }
         List<Expression<Func<T, bool>>> Includes { get; }

@@ -1,10 +1,10 @@
 ﻿using DATA.Repository.Abstraction.Helpers;
-using DATA.Repository.Implementation.Models;
+using DATA.Repository.Abstraction.Models;
 
 namespace DATA.Repository.Abstraction
 {
     public class SimpleResult<T> : IResult<T>
-        where T: BaseEntity
+        where T: IBaseEntity
     {
         public RequestStatus Status { get; set; } = RequestStatus.NEW; 
         public bool Succeeded { get {
