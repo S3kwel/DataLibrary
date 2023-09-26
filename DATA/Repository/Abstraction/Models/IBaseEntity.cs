@@ -5,7 +5,7 @@
         Guid Id { get; }
         Guid VersionTag { get; set; }
         public bool IsDeleted { get; set; }
-        string StringId { get; }
+        public string StringId { get { return Id.ToString(); } }
     }
 
 }

@@ -16,7 +16,11 @@ namespace Spike.Pages
 
         public void OnGet()
         {
-            //var test = _unitOfWork.HistoricRepository<AuthorHistoricV1>().HistoricAllTime();   
+            //TODO:  Option / Flag to just export results without all the metadata?  
+            //Global success indicator is not working correctly.  
+            var test = _unitOfWork.Repository<AuthorV1>().GetAll();
+
+            Console.Write("aaaa"); 
         }
     }
 }

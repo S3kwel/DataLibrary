@@ -3,6 +3,7 @@ using DATA.Repository.Abstraction.Helpers;
 using DATA.Repository.Abstraction.Models;
 using DATA.Repository.Implementation.Debugging;
 using DATA.Repository.Implementation.Helpers;
+using DATA.Repository.Implementation.Specifications;
 using Microsoft.EntityFrameworkCore;
 
 namespace DATA.Repository.Implementation
@@ -394,6 +395,21 @@ namespace DATA.Repository.Implementation
                     Message = $"Failed to delete entities. Error: {ex.Message}"
                 };
             }
+        }
+
+        public async Task<Result<BaseFilter<T>, T>> GetAllAsync()
+        {
+            var filter = new BaseFilter<T>();
+            filter.Specifications.Add(new AllSpecification<T>());
+            return await ProcessAsync(filter);
+        }
+
+        public Result<BaseFilter<T>, T> GetAll()
+        {
+            var filter = new BaseFilter<T>();
+            filter.Specifications.Add(new AllSpecification<T>());
+            return Process(filter); 
+     
         }
     }
 }

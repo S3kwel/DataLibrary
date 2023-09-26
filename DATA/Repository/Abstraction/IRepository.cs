@@ -5,6 +5,7 @@ namespace DATA.Repository.Abstraction
 {
     public interface IRepository<T> where T : IBaseEntity
     {
+       
         SimpleResult<T> Add(T entity);
         SimpleResult<T> Add(List<T> entities);
         Task<SimpleResult<T>> AddAsync(T entity);
@@ -15,6 +16,8 @@ namespace DATA.Repository.Abstraction
         SimpleResult<T> Delete(List<T> entities);
         Result<BaseFilter<T>, T> Process(BaseFilter<T> filter);
         Task<Result<BaseFilter<T>, T>> ProcessAsync(BaseFilter<T> filter);
+        Task<Result<BaseFilter<T>, T>> GetAllAsync ();
+        Result<BaseFilter<T>, T> GetAll ();
         SimpleResult<T> Update(T entity);
         SimpleResult<T> Update(List<T> entities);
     }

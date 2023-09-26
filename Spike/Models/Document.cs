@@ -11,7 +11,6 @@ namespace Spike.Models
         public Guid Id { get; set; }
         public Guid VersionTag { get; set; }
         public bool IsDeleted { get; set; }
-        public string StringId { get; set; }
     }
 
     public class DocumentHistoricV1 : IHistoricEntity, IBaseEntity
@@ -23,8 +22,6 @@ namespace Spike.Models
         public DateTime PeriodEnd { get; set; }
         public Guid VersionTag { get; set; }
         public bool IsDeleted { get; set; }
-
-        public string StringId { get; set; } = string.Empty;
         IEnumerable<DocumenV1AuthorV1HJoin> DocumentAuthors { get; set; }
     }
 

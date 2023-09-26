@@ -12,7 +12,6 @@ namespace Spike.Models
         public virtual IEnumerable<DocumentV1>? DocumentsV1 { get; set; }
         public Guid VersionTag { get; set; }
         public bool IsDeleted { get; set; }
-        public string StringId { get; set; }
     }
 
     public class AuthorHistoricV1 : IHistoricEntity, IBaseEntity
@@ -25,7 +24,6 @@ namespace Spike.Models
         IEnumerable<DocumenV1AuthorV1HJoin> DocumentAuthors { get; set; }    
         public Guid VersionTag { get; set; }
         public bool IsDeleted { get; set; }
-        public string StringId { get; set; } = string.Empty; 
     }
 
     //Make this historic.

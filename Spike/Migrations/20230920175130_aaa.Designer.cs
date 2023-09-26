@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Spike;
 
@@ -11,9 +12,11 @@ using Spike;
 namespace Spike.Migrations
 {
     [DbContext(typeof(SpikeContext))]
-    partial class SpikeContextModelSnapshot : ModelSnapshot
+    [Migration("20230920175130_aaa")]
+    partial class aaa
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,64 +33,11 @@ namespace Spike.Migrations
                     b.Property<Guid>("DocumentsV1Id")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("PeriodEnd")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("PeriodEnd");
-
-                    b.Property<DateTime>("PeriodStart")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("PeriodStart");
-
                     b.HasKey("AuthorsV1Id", "DocumentsV1Id");
 
                     b.HasIndex("DocumentsV1Id");
 
                     b.ToTable("AuthorV1DocumentV1");
-
-                    b.ToTable(tb => tb.IsTemporal(ttb =>
-                            {
-                                ttb.UseHistoryTable("AuthorV1DocumentV1History");
-                                ttb
-                                    .HasPeriodStart("PeriodStart")
-                                    .HasColumnName("PeriodStart");
-                                ttb
-                                    .HasPeriodEnd("PeriodEnd")
-                                    .HasColumnName("PeriodEnd");
-                            }));
-                });
-
-            modelBuilder.Entity("Spike.Models.AuthorHistoricV1", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("PeriodEnd")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("PeriodStart")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("VersionTag")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.ToTable((string)null);
-
-                    b.ToView("AuthorHistoricV1", (string)null);
                 });
 
             modelBuilder.Entity("Spike.Models.AuthorV1", b =>
@@ -107,124 +57,62 @@ namespace Spike.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("PeriodEnd")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("PeriodEnd");
-
-                    b.Property<DateTime>("PeriodStart")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("PeriodStart");
-
                     b.Property<Guid>("VersionTag")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
-                    b.ToTable("AuthorV1", (string)null);
-
-                    b.ToTable(tb => tb.IsTemporal(ttb =>
-                            {
-                                ttb.UseHistoryTable("AuthorHistoricV1");
-                                ttb
-                                    .HasPeriodStart("PeriodStart")
-                                    .HasColumnName("PeriodStart");
-                                ttb
-                                    .HasPeriodEnd("PeriodEnd")
-                                    .HasColumnName("PeriodEnd");
-                            }));
+                    b.ToTable("AuthorsV1");
 
                     b.HasData(
                         new
                         {
-                            Id = new Guid("7e0a3c74-888a-4f33-8eaf-3e3aad9ee6eb"),
+                            Id = new Guid("e9c65d02-fbd0-4d04-8f80-72434a4d8418"),
                             FirstName = "Dustin",
                             IsDeleted = false,
                             LastName = "Hickman",
-                            VersionTag = new Guid("110b982e-b412-4959-adb7-a52da3a1d21d")
+                            VersionTag = new Guid("00776a78-d85f-4642-8ac6-ed41c3af0908")
                         },
                         new
                         {
-                            Id = new Guid("146eed62-79d3-43e7-8272-abb24be979bb"),
+                            Id = new Guid("91229e2c-080b-4278-9534-fa6e67c292f4"),
                             FirstName = "TEST",
                             IsDeleted = false,
                             LastName = "TEST",
-                            VersionTag = new Guid("d44ed1da-d35f-44b9-94e5-e8628ee5bcd2")
+                            VersionTag = new Guid("3310af3b-a082-4f43-8b1e-16cf518a7aca")
                         },
                         new
                         {
-                            Id = new Guid("c2020461-f96d-4b3d-a951-9133be91c529"),
+                            Id = new Guid("c4b55537-3a96-4fa4-b4ab-1e9370f43f1d"),
                             FirstName = "TEST2",
                             IsDeleted = false,
                             LastName = "TEST2",
-                            VersionTag = new Guid("58039359-fe12-4c57-8327-0a6cad5c2b4c")
+                            VersionTag = new Guid("5a089d88-b3ef-4353-aa3b-b0fb7cbf23a0")
                         },
                         new
                         {
-                            Id = new Guid("4d549e66-92c1-470d-8e01-7e0fea724a99"),
+                            Id = new Guid("cb60381c-40f7-4f60-877d-8cec6e0f4f14"),
                             FirstName = "TEST3",
                             IsDeleted = false,
                             LastName = "TEST3",
-                            VersionTag = new Guid("47b10859-c32e-4337-a1b7-bad81c4cd4ba")
+                            VersionTag = new Guid("fbaf9e5f-efa2-4ab6-a13c-5dcd07374ea1")
                         },
                         new
                         {
-                            Id = new Guid("68db927a-4199-473c-8f11-1a4aadfcae25"),
+                            Id = new Guid("bbd174a6-7b4f-433c-81b8-566cf1c256cc"),
                             FirstName = "TEST4",
                             IsDeleted = false,
                             LastName = "TEST4",
-                            VersionTag = new Guid("710312c8-0453-4f44-beff-28bc8b53bebc")
+                            VersionTag = new Guid("54a0fcd2-88e8-41a3-81ad-1eab71ce67ae")
                         },
                         new
                         {
-                            Id = new Guid("9aae96e0-71d6-4b83-a28e-9bb0175a3221"),
+                            Id = new Guid("74ed5347-b141-4199-8d67-cf1d4518663f"),
                             FirstName = "TEST5",
                             IsDeleted = false,
                             LastName = "TEST5",
-                            VersionTag = new Guid("1a08a3df-e8c9-40e9-80f7-da84f3dfa2f3")
+                            VersionTag = new Guid("86ab04ff-417d-4588-9d19-159a8a31b7e2")
                         });
-                });
-
-            modelBuilder.Entity("Spike.Models.DocumenV1AuthorV1HJoin", b =>
-                {
-                    b.Property<Guid>("JoinId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("AuthorHistoricV1Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("AuthorV1ID")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("DocmentV1ID")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("DocumentHistoricV1Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("JoinID")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("Type1ID")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("Type2ID")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("JoinId");
-
-                    b.HasIndex("AuthorHistoricV1Id");
-
-                    b.HasIndex("DocumentHistoricV1Id");
-
-                    b.HasIndex("Type1ID");
-
-                    b.HasIndex("Type2ID");
-
-                    b.ToTable((string)null);
-
-                    b.ToView("DocumentHistoricV1AuthorHistoricV1History", (string)null);
                 });
 
             modelBuilder.Entity("Spike.Models.DocumentHistoricV1", b =>
@@ -307,67 +195,67 @@ namespace Spike.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("3f0b60f3-f97e-4e7d-9d4f-12fd2f2ee01e"),
+                            Id = new Guid("fb8ef815-7d12-429c-b722-ecf2c910d794"),
                             Description = "TEST DESCRIPTION",
                             IsDeleted = false,
                             Title = "DOCUMENT 1",
-                            VersionTag = new Guid("cb17117e-fa5b-4955-90e3-ef8722a9490f")
+                            VersionTag = new Guid("5d361d70-133f-4ea6-a4a6-38d6c093d6f2")
                         },
                         new
                         {
-                            Id = new Guid("75cfc5a0-ccfc-4ebf-bd19-533ab61baba6"),
+                            Id = new Guid("029918c4-e431-4e8f-a2f8-1126f6ba7ec9"),
                             Description = "TEST DESCRIPTION",
                             IsDeleted = false,
                             Title = "DOCUMENT 2",
-                            VersionTag = new Guid("00f8f26c-608d-49b0-97c1-56eff9c921e9")
+                            VersionTag = new Guid("361eb655-a3c9-4ba0-871c-076d2ab908ed")
                         },
                         new
                         {
-                            Id = new Guid("d778974e-32f7-4d64-b0cd-c04b1564f517"),
+                            Id = new Guid("bed71ac2-af31-4924-8705-e09506864f2c"),
                             Description = "TEST DESCRIPTION",
                             IsDeleted = false,
                             Title = "DOCUMENT 3",
-                            VersionTag = new Guid("9e371d22-09f1-4670-bb71-855e651b19d7")
+                            VersionTag = new Guid("c12f14e9-35e7-4ed1-b2ad-efc9f81ca987")
                         },
                         new
                         {
-                            Id = new Guid("baaa9b61-0b55-4461-ad93-99bf2fa76235"),
+                            Id = new Guid("003841a5-ab79-4bdf-a542-f6f19ac7f82f"),
                             Description = "TEST DESCRIPTION",
                             IsDeleted = false,
                             Title = "DOCUMENT 4",
-                            VersionTag = new Guid("c86ea14e-7b04-4f9e-8dac-f891fc5f2178")
+                            VersionTag = new Guid("60c75823-d1b5-4d28-87fc-1cc6d8a6ca6b")
                         },
                         new
                         {
-                            Id = new Guid("99f0ad36-a94a-4876-955b-a18f7d812ea2"),
+                            Id = new Guid("50d968af-b91d-4755-aaf2-44a0213f1579"),
                             Description = "TEST DESCRIPTION",
                             IsDeleted = false,
                             Title = "DOCUMENT 5",
-                            VersionTag = new Guid("825715ff-ec25-4498-8fcf-4c02abcaa32c")
+                            VersionTag = new Guid("a652dabf-dd83-442a-bcd8-50e8adcda9c9")
                         },
                         new
                         {
-                            Id = new Guid("30cb5bbd-5db9-4a74-b722-7079bce0b028"),
+                            Id = new Guid("22137203-08ef-471d-8e72-e38a2c83493b"),
                             Description = "TEST DESCRIPTION",
                             IsDeleted = false,
                             Title = "DOCUMENT 6",
-                            VersionTag = new Guid("8ab6f9e8-7fbe-4b68-8566-d3fd563d62ea")
+                            VersionTag = new Guid("b9d61f5a-9a26-425d-8f5d-933af23ee89d")
                         },
                         new
                         {
-                            Id = new Guid("80c1e35d-94f1-4ace-b3e4-44c261ebecba"),
+                            Id = new Guid("46748805-5a5b-4026-a59d-5c9a5fb1f224"),
                             Description = "TEST DESCRIPTION",
                             IsDeleted = false,
                             Title = "DOCUMENT 7",
-                            VersionTag = new Guid("9d21f275-e3a3-479a-83a9-f4a9240ebc3d")
+                            VersionTag = new Guid("3bc0107e-e2ed-4125-84f0-72efb7077de2")
                         },
                         new
                         {
-                            Id = new Guid("60016ac8-7304-40a5-9e3f-b45b4e504fbe"),
+                            Id = new Guid("742ddaae-dc5e-4e17-b417-4c71edcead9f"),
                             Description = "TEST DESCRIPTION",
                             IsDeleted = false,
                             Title = "DOCUMENT 8",
-                            VersionTag = new Guid("a94511bd-cbc6-4cba-ad13-60f8562f21a6")
+                            VersionTag = new Guid("ab91b520-2db5-425d-be67-34a57fd526ca")
                         });
                 });
 
@@ -384,41 +272,6 @@ namespace Spike.Migrations
                         .HasForeignKey("DocumentsV1Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Spike.Models.DocumenV1AuthorV1HJoin", b =>
-                {
-                    b.HasOne("Spike.Models.AuthorHistoricV1", "AuthorHistoricV1")
-                        .WithMany()
-                        .HasForeignKey("AuthorHistoricV1Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Spike.Models.DocumentHistoricV1", "DocumentHistoricV1")
-                        .WithMany()
-                        .HasForeignKey("DocumentHistoricV1Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Spike.Models.DocumentHistoricV1", "Type1")
-                        .WithMany()
-                        .HasForeignKey("Type1ID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Spike.Models.AuthorHistoricV1", "Type2")
-                        .WithMany()
-                        .HasForeignKey("Type2ID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AuthorHistoricV1");
-
-                    b.Navigation("DocumentHistoricV1");
-
-                    b.Navigation("Type1");
-
-                    b.Navigation("Type2");
                 });
 #pragma warning restore 612, 618
         }
